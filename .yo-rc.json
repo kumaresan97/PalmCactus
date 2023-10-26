@@ -1,0 +1,16 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": false,
+    "version": "1.14.0",
+    "libraryName": "s-florida",
+    "libraryId": "4de496e0-5df5-4c35-a301-d7ec0b61de50",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "SFlorida",
+    "solutionShortDescription": "SFlorida description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

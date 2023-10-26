@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "s-florida-client-side-solution",
+    "id": "4de496e0-5df5-4c35-a301-d7ec0b61de50",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.14.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "SFlorida description"
+      },
+      "longDescription": {
+        "default": "SFlorida description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "s-florida Feature",
+        "description": "The feature that activates elements of the s-florida solution.",
+        "id": "a7c7eda2-bfd7-46db-bbb2-0a661c155468",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/s-florida.sppkg"
+  }
+}

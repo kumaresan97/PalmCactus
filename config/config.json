@@ -1,0 +1,28 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "s-florida-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/sFlorida/SFloridaWebPart.js",
+          "manifest": "./src/webparts/sFlorida/SFloridaWebPart.manifest.json"
+        }
+      ]
+    },
+    "disclosed-investors-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/disclosedInvestors/DisclosedInvestorsWebPart.js",
+          "manifest": "./src/webparts/disclosedInvestors/DisclosedInvestorsWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "SFloridaWebPartStrings": "lib/webparts/sFlorida/loc/{locale}.js",
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
+    "DisclosedInvestorsWebPartStrings": "lib/webparts/disclosedInvestors/loc/{locale}.js"
+  }
+}
