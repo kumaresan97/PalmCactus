@@ -21,6 +21,7 @@ import "./style.css";
 import Pagination from "office-ui-fabric-react-pagination";
 import { Spinner, SpinnerSize } from "@fluentui/react/lib/Spinner";
 import * as moment from "moment";
+import styles from "./SFlorida.module.scss";
 
 let DataArray: any[] = [];
 let arrSecondary: any[] = [];
@@ -64,6 +65,7 @@ let objFilter = {
   mls: "",
   sort: "newerToOlder",
 };
+let objSelectedProperty: any;
 const MainComponent = (props) => {
   const [masterData, setmasterdata] = useState<Data[]>([]);
   const [duplicate, setDuplicate] = useState<Data[]>([]);
@@ -452,6 +454,74 @@ const MainComponent = (props) => {
     },
   };
 
+  //Trestle API fetch
+  const handlerApiFetch = () => {
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+    var urlencoded = new URLSearchParams();
+    urlencoded.append("client_id", "89994d04_f548_4c52_98d0_39cd691a037c");
+    urlencoded.append("client_secret", "722b13623c6843899e72e883be10a64d");
+    urlencoded.append("scope", "api");
+    urlencoded.append("grant_type", "client_credentials");
+
+    //  Get Access Token and passing it to get all the values
+    fetch("https://api-prod.corelogic.com/trestle/oidc/connect/token", {
+      // Replace with the correct token endpoint URL
+      method: "POST",
+      headers: myHeaders,
+      body: urlencoded,
+      redirect: "follow",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json(); // Parse the response as JSON
+      })
+      .then((result) => {
+        console.log(result); // The access token will be in result.access_token
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", `Bearer ${result.access_token}`);
+        // To Get All the Items from Trestle
+        fetch(
+          `https://api-prod.corelogic.com/trestle/odata/Property?$filter=BuyerAgentMlsId eq '${value.Title}'`,
+          {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow",
+          }
+        )
+          .then((response) => response.json())
+          .then((result) => {
+            let FormData = { ...value };
+            objSelectedProperty = result.value[0];
+            if (result.value.length == 0) {
+              window.alert("Please enter valid MLS number");
+              console.log(objSelectedProperty);
+              FormData.PropertyAddress = "";
+              FormData.Status = "";
+              FormData.Price = "";
+              FormData.AgentName = "";
+              FormData.AgentNumber = "";
+              FormData.PeopleEmail = "";
+              console.log(FormData);
+              setvalue({ ...FormData });
+            } else {
+              console.log(objSelectedProperty);
+              FormData.PropertyAddress = objSelectedProperty.UnparsedAddress;
+              FormData.Status = objSelectedProperty.MlsStatus;
+              FormData.Price = objSelectedProperty.ListPrice;
+              FormData.AgentName = objSelectedProperty.BuyerAgentFullName;
+              FormData.AgentNumber = objSelectedProperty.BuyerAgentDirectPhone;
+              FormData.PeopleEmail = objSelectedProperty.BuyerAgentEmail;
+              console.log(FormData);
+              setvalue({ ...FormData });
+            }
+          })
+          .catch((error) => console.log("error", error));
+      })
+      .catch((error) => console.log("error", error));
+  };
   //sortFunction
 
   const sortFunction = (value) => {
@@ -1520,7 +1590,13 @@ const MainComponent = (props) => {
                   }}
                 />
                 {/* //lastchange */}
-                <IconButton iconProps={{ iconName: "Search" }}></IconButton>
+                <IconButton
+                  onClick={() => {
+                    handlerApiFetch();
+                  }}
+                  className={styles.btnSearchIcon}
+                  iconProps={{ iconName: "Search" }}
+                ></IconButton>
               </div>
             </div>
             <div style={{ margin: "10px 0px 15px 0px" }}>
