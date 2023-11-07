@@ -158,7 +158,7 @@ const MainComponent = (props) => {
     ID: null,
     assignId: null,
   });
-  const [reRender, SetReRender] = useState(true);
+  // const [reRender, SetReRender] = useState(true);
   const searchstyle = {
     root: {
       width: 160,
@@ -544,7 +544,6 @@ const MainComponent = (props) => {
   const selection = new Selection({
     onSelectionChanged: () => {
       const selectedItem: any[] = selection.getSelection();
-
       if (selectedItem.length > 0) {
         if (selectedItem.length == 1) {
           setId(selectedItem[0].ID);
@@ -838,7 +837,6 @@ const MainComponent = (props) => {
                 // SetReRender(true);
                 getData();
                 setLoader(false);
-
                 // alert("deleted successfully");
               })
               .catch((err) => {

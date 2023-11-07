@@ -5,40 +5,28 @@
 .content_3f3fd3c2,
 .CanvasZone {
   padding: 0 !important;
-
   max-width: 100% !important;
 }
 
 .report-style-class {
   height: 100vh;
 }
-
 .ms-Panel-commands {
   display: none !important;
 }
-
-.text_ellipsis {
-  display: "block";
-  white-space: "nowrap";
-  overflow: "hidden";
-  text-overflow: "ellipsis";
-  margin: 0;
-}
-
-/* .pagination {
-  display: flex;
-  justify-content: center;
-  margin: 30px 0px;
-} */
-
-[data-automation-id="CanvasZone"] > div {
-  max-width: 100% !important;
-}
-
 div#CommentsWrapper {
   display: none;
 }
 
+.text_ellipsis {
+  /* display: "block"; */
+  white-space: nowrap;
+  overflow: hidden;
+  width: 100px;
+  text-overflow: ellipsis;
+  margin: 0;
+  cursor: pointer;
+}
 .pagination {
   text-align: center;
   cursor: pointer !important;
@@ -56,69 +44,13 @@ div#CommentsWrapper {
 
 .pagination .ms-Button.ms-Button--primary .ms-Button-label {
   color: #fff;
-  background: #202945;
+  /* background: #202945; */
+  background: #02767a;
   padding: 10px 14px;
   border-radius: 50%;
 }
+/* mobile */
 
-/* .filter_wraper_inner{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.filter_icon{
-  position: absolute;
-  right: 0;
-  bottom: -50px;
-  padding: 10px;
-  background-color: #fff;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  box-shadow:
-        0 10px 27px rgba(0, 0, 0, 0.05);
-}
-@media only screen and (max-width: 768px) {
-  .filter_wraper{
-    display: none;
-    padding: 10px 20px;
-    background-color: #fff;
-    box-shadow:
-          0 10px 27px rgba(0, 0, 0, 0.05);
-  }
-  .active{
-    display: block;
-  }
-  .filer_container{
-    position: fixed;
-    right: 20px;
-    bottom: 55px;
-    z-index: 1;
-    border-radius: 10px;
-    text-align: center;
-    transition: 0.3s;
-  }
-  .filter_wraper_inner{
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .nav-menu.active {
-      left: 0;
-  }
-
-  .nav-item {
-      margin: 2.5rem 0;
-  }
-
-  .hamburger {
-      display: block;
-      cursor: pointer;
-  }
-
-} */
 .header_filter_wraper {
   display: flex;
   align-items: center;
@@ -203,4 +135,8 @@ div#CommentsWrapper {
   .filter_wraper_inner .btn_filter {
     margin-bottom: 10px;
   }
+}
+
+.para {
+  margin: 0;
 }
