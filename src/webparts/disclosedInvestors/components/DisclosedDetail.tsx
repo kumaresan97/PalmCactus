@@ -27,7 +27,7 @@ import * as moment from "moment";
 import { Config } from "../../config/config";
 import Pagination from "office-ui-fabric-react-pagination";
 
-import { IList } from "../../config/config";
+import { IList, ICurrentUserInfo } from "../../config/config";
 import SPServices from "../../config/SPServices";
 import {
   PeoplePicker,
@@ -36,162 +36,8 @@ import {
 import "./Style.css";
 import * as strings from "SFloridaWebPartStrings";
 import { values } from "office-ui-fabric-react";
+import * as alertify from "alertifyjs";
 let img: string = require("../assets/Filter.png");
-
-// const col: IColumn[] = [
-//   {
-//     key: "column1",
-//     name: "Investor Name",
-//     fieldName: "InvestorName",
-//     minWidth: 100,
-//     maxWidth: 200,
-//     onRender(item, index, column) {
-//       console.log(item, index, column);
-//     },
-//   },
-//   {
-//     key: "column2",
-//     name: "LLC",
-//     fieldName: "LLC",
-//     minWidth: 100,
-//     maxWidth: 200,
-//   },
-//   {
-//     key: "column3",
-//     name: "Phone #",
-//     fieldName: "Phone",
-//     minWidth: 100,
-//     maxWidth: 200,
-//   },
-//   {
-//     key: "column4",
-//     name: "Email",
-//     fieldName: "Email",
-//     minWidth: 100,
-//     maxWidth: 200,
-//   },
-//   {
-//     key: "column5",
-//     name: "Purchase Price Range",
-//     fieldName: "PurchasePriceRange",
-//     minWidth: 100,
-//     maxWidth: 200,
-//     onRender: (Item: any) => {
-//       return (
-//         <TooltipHost content={Item.PurchasePriceRange.join(",")}>
-//           <p className="text_ellipsis">{Item.PurchasePriceRange.join(",")}</p>
-//         </TooltipHost>
-//       );
-//     },
-//   },
-//   {
-//     key: "column6",
-//     name: "InvestorStrategy",
-//     fieldName: "InvestorStrategy",
-//     minWidth: 100,
-//     maxWidth: 200,
-//     onRender: (Item: any) => {
-//       return (
-//         <TooltipHost content={Item.InvestorStrategy.join(",")}>
-//           <p className="text_ellipsis">{Item.InvestorStrategy.join(",")}</p>
-//         </TooltipHost>
-//       );
-//     },
-//   },
-
-//   {
-//     key: "column6",
-//     name: "Areas",
-//     fieldName: "Areas",
-//     minWidth: 100,
-//     maxWidth: 200,
-//     onRender: (Item: any) => {
-//       return (
-//         <TooltipHost content={Item.Areas.join(",")}>
-//           <p className="text_ellipsis">{Item.Areas.join(",")}</p>
-//         </TooltipHost>
-//       );
-//     },
-//   },
-//   {
-//     key: "column6",
-//     name: "Notes",
-//     fieldName: "Notes",
-//     minWidth: 100,
-//     maxWidth: 200,
-//     onRender: (Item: any) => {
-//       return (
-//         <TooltipHost content={Item.Notes}>
-//           <p className="text_ellipsis">{Item.Notes}</p>
-//         </TooltipHost>
-//       );
-//     },
-//   },
-//   {
-//     key: "column6",
-//     name: "AssignedTo",
-//     fieldName: "AssignedName",
-//     minWidth: 100,
-//     maxWidth: 200,
-//   },
-
-//   {
-//     key: "column6",
-//     name: "DisclosedUrl",
-//     fieldName: "",
-//     minWidth: 100,
-//     maxWidth: 200,
-//     onRender: (item) => {
-//       console.log(item, "disclosure");
-
-//       return <a href={item.Url}>{item.Text}</a>;
-//     },
-//   },
-//   {
-//     key: "column6",
-//     name: "ContactID",
-//     fieldName: "ContactID",
-//     minWidth: 100,
-//     maxWidth: 200,
-//   },
-//   {
-//     key: "column6",
-//     name: "FileID",
-//     fieldName: "FileID",
-//     minWidth: 100,
-//     maxWidth: 200,
-//   },
-
-//   {
-//     key: "column11",
-//     name: "Disclosure",
-//     fieldName: "attachments",
-//     minWidth: 100,
-//     maxWidth: 200,
-//     isResizable: true,
-//     onRender: (item: any) => {
-//       console.log(item, "item");
-
-//       return (
-//         <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
-//           {item.attachments.map((att, index) => (
-//             <li title={att.fileName} key={index}>
-//               <a
-//                 className="text_ellipsis"
-//                 style={{ color: "#605E5C", cursor: "pointer" }}
-//                 href={att.serverRelativeUrl}
-//                 target="_blank"
-//                 rel="noopener noreferrer"
-//               >
-//                 {att.fileName}
-//               </a>
-//             </li>
-//           ))}
-//         </ul>
-//       );
-//     },
-//   },
-// ];
 
 //styles
 const buttonstyle = {
@@ -256,30 +102,6 @@ const dollarInputStyle: Partial<ITextFieldStyles> = {
     },
   },
 };
-// const Datas: IList[] = [
-//   {
-//     InvestorName: "",
-//     LLC: "",
-//     Phone: "",
-//     Email: "",
-//     PurchasePriceRange: [],
-
-//     Notes: "",
-//     InvestorStrategy: [],
-
-//     ContactID: "",
-//     FileID: "",
-//     AssignedTo: null,
-//     PeopleEmail: "",
-//     Areas: [],
-//     Url: "",
-//     Text: "",
-//     AssignedName: "",
-//     ID: null,
-//     attachments: [],
-//   },
-// ];
-
 const _data: IList = {
   InvestorName: "",
   LLC: "",
@@ -314,7 +136,10 @@ let objFilter = {
   LLC: "",
   User: "",
 };
+let objCurrentUserInfo: ICurrentUserInfo = null;
 const ListName: string = "Disclosed Investors Devlist";
+
+// AssigedTo EMail as PeopleEmail;
 const DisclosedDetail = (props) => {
   const [state, setState] = useState<IList[]>([]);
   const [masterData, setMasterData] = useState([]);
@@ -350,10 +175,18 @@ const DisclosedDetail = (props) => {
     LLC: "",
     User: "",
   });
-
+  const [isTranferModal, SetIsTransferModal] = useState(false);
+  const [currentUserInfo, setCurrentUserInfo] =
+    useState<ICurrentUserInfo>(null);
+  const [isCurrUserItem, setIsCurrUserItem] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   //column
   const _curUser: string = props.context._pageContext._user.email;
-
+  const [optPurchaseRange, setOptPurchaseRange] = useState([
+    { key: "", text: "" },
+  ]);
+  const [optInvStrategy, setOptInvStrategy] = useState([{ key: "", text: "" }]);
+  const [optAreas, setOptAreas] = useState([{ key: "", text: "" }]);
   const col: IColumn[] = [
     {
       key: "column1",
@@ -373,6 +206,24 @@ const DisclosedDetail = (props) => {
       isResizable: true,
     },
     {
+      key: "column6",
+      name: "Notes",
+      fieldName: "Notes",
+      minWidth: 100,
+      maxWidth: 200,
+      isResizable: true,
+      onRender: (Item: any) => {
+        return isAdmin ||
+          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <TooltipHost content={Item.Notes}>
+            <p className="text_ellipsis">{Item.Notes}</p>
+          </TooltipHost>
+        ) : (
+          ""
+        );
+      },
+    },
+    {
       key: "column2",
       name: "LLC",
       fieldName: "LLC",
@@ -380,6 +231,7 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
     },
+
     {
       key: "column3",
       name: "Phone #",
@@ -388,7 +240,8 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender(item) {
-        return item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+        return isAdmin ||
+          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
           <div>
             <p className="para">{item.Phone}</p>
           </div>
@@ -407,12 +260,13 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender: (Item: any) => {
-        return (
-          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <TooltipHost content={Item.Email}>
-              <p className="text_ellipsis">{Item.Email}</p>
-            </TooltipHost>
-          )
+        return isAdmin ||
+          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <TooltipHost content={Item.Email}>
+            <p className="text_ellipsis">{Item.Email}</p>
+          </TooltipHost>
+        ) : (
+          ""
         );
       },
     },
@@ -424,14 +278,13 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender: (Item: any) => {
-        return (
-          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <TooltipHost content={Item.PurchasePriceRange.join(",")}>
-              <p className="text_ellipsis">
-                {Item.PurchasePriceRange.join(",")}
-              </p>
-            </TooltipHost>
-          )
+        return isAdmin ||
+          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <TooltipHost content={Item.PurchasePriceRange.join(",")}>
+            <p className="text_ellipsis">{Item.PurchasePriceRange.join(",")}</p>
+          </TooltipHost>
+        ) : (
+          ""
         );
       },
     },
@@ -443,12 +296,13 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender: (Item: any) => {
-        return (
-          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <TooltipHost content={Item.InvestorStrategy.join(",")}>
-              <p className="text_ellipsis">{Item.InvestorStrategy.join(",")}</p>
-            </TooltipHost>
-          )
+        return isAdmin ||
+          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <TooltipHost content={Item.InvestorStrategy.join(",")}>
+            <p className="text_ellipsis">{Item.InvestorStrategy.join(",")}</p>
+          </TooltipHost>
+        ) : (
+          ""
         );
       },
     },
@@ -461,32 +315,17 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender: (Item: any) => {
-        return (
-          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <TooltipHost content={Item.Areas.join(",")}>
-              <p className="text_ellipsis">{Item.Areas.join(",")}</p>
-            </TooltipHost>
-          )
+        return isAdmin ||
+          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <TooltipHost content={Item.Areas.join(",")}>
+            <p className="text_ellipsis">{Item.Areas.join(",")}</p>
+          </TooltipHost>
+        ) : (
+          ""
         );
       },
     },
-    {
-      key: "column6",
-      name: "Notes",
-      fieldName: "Notes",
-      minWidth: 100,
-      maxWidth: 200,
-      isResizable: true,
-      onRender: (Item: any) => {
-        return (
-          Item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <TooltipHost content={Item.Notes}>
-              <p className="text_ellipsis">{Item.Notes}</p>
-            </TooltipHost>
-          )
-        );
-      },
-    },
+
     {
       key: "column6",
       name: "DisclosedUrl",
@@ -495,11 +334,7 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender: (item) => {
-        return (
-          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <a href={item.Url}>{item.Text}</a>
-          )
-        );
+        return <a href={item.Url}>{item.Text}</a>;
       },
     },
     {
@@ -519,12 +354,13 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender: (item) => {
-        return (
-          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <div>
-              <p className="para">{item.Created}</p>
-            </div>
-          )
+        return isAdmin ||
+          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <div>
+            <p className="para">{item.Created}</p>
+          </div>
+        ) : (
+          ""
         );
       },
     },
@@ -537,12 +373,13 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender: (item) => {
-        return (
-          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <div>
-              <p className="para">{item.CreatedBy}</p>
-            </div>
-          )
+        return isAdmin ||
+          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <div>
+            <p className="para">{item.CreatedBy}</p>
+          </div>
+        ) : (
+          ""
         );
       },
     },
@@ -554,12 +391,13 @@ const DisclosedDetail = (props) => {
       maxWidth: 200,
       isResizable: true,
       onRender: (item) => {
-        return (
-          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <div>
-              <p className="para">{item.Modified}</p>
-            </div>
-          )
+        return isAdmin ||
+          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <div>
+            <p className="para">{item.Modified}</p>
+          </div>
+        ) : (
+          ""
         );
       },
     },
@@ -572,12 +410,13 @@ const DisclosedDetail = (props) => {
       minWidth: 100,
       maxWidth: 200,
       onRender: (item) => {
-        return (
-          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <div>
-              <p className="para">{item.ModifiedBy}</p>
-            </div>
-          )
+        return isAdmin ||
+          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <div>
+            <p className="para">{item.ModifiedBy}</p>
+          </div>
+        ) : (
+          ""
         );
       },
     },
@@ -606,29 +445,45 @@ const DisclosedDetail = (props) => {
       isResizable: true,
 
       onRender: (item: any) => {
-        return (
-          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() && (
-            <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
-              {item.attachments.map((att, index) => (
-                <li title={att.fileName} key={index}>
-                  <a
-                    className="text_ellipsis"
-                    style={{ color: "#605E5C", cursor: "pointer" }}
-                    href={att.serverRelativeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {att.fileName}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )
+        return isAdmin ||
+          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+          <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
+            {item.attachments.map((att, index) => (
+              <li title={att.fileName} key={index}>
+                <a
+                  className="text_ellipsis"
+                  style={{ color: "#605E5C", cursor: "pointer" }}
+                  href={att.serverRelativeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {att.fileName}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          ""
         );
       },
     },
   ];
-
+  // get currentUserINfo
+  const getCurrentUserInfo = () => {
+    sp.web.currentUser.get().then((res) => {
+      console.log(res);
+      objCurrentUserInfo = {
+        Title: res.Title,
+        Email: res.Email,
+        Id: res.Id,
+        UserPrincipalName: res.UserPrincipalName,
+      };
+      setIsAdmin(
+        res.UserPrincipalName.toLocaleLowerCase() === "jason@palmcactus.com"
+      );
+      setCurrentUserInfo({ ...objCurrentUserInfo });
+    });
+  };
   //   Config.ListName.Email
   const getDatas = () => {
     SPServices.SPReadItems({
@@ -835,6 +690,10 @@ const DisclosedDetail = (props) => {
       const selectedItem: any[] = itemSelection.getSelection();
       if (selectedItem.length == 1) {
         setUpdateData({ ...selectedItem[0] });
+        // checking current is Assigned To/
+        setIsCurrUserItem(selectedItem[0].PeopleEmail == currentUserInfo.Email);
+
+        selectedItem[0];
         select.multiSelect = false;
         select.singleSelect = true;
         select.id = selectedItem[0].ID;
@@ -1066,7 +925,32 @@ const DisclosedDetail = (props) => {
     setPage(paginatedItems);
     setPaginateNumber([firstIndex, lastIndex]);
   }
-
+  const handlerRequestTransfer = (item) => {
+    console.log(item.ID);
+    sp.web.currentUser
+      .get()
+      .then((res) => {
+        console.log(res.Id);
+        let update = {
+          TransferToId: res.Id,
+        };
+        SPServices.SPUpdateItem({
+          // Listname: "Disclosed Investors Dev",
+          Listname: ListName,
+          ID: item.ID,
+          RequestJSON: update,
+        });
+      })
+      .then((res) => {
+        SetIsTransferModal(false);
+        alertify.set("notifier", "position", "top-right");
+        alertify.success("Request Raised successfully!");
+      })
+      .catch((err) => {
+        alert("err");
+        SetIsTransferModal(false);
+      });
+  };
   ///search filter
 
   const handleSearch = (val) => {
@@ -1098,10 +982,72 @@ const DisclosedDetail = (props) => {
   const handleResponsiveChange = () => {
     setIsMobile(window.innerWidth <= 768);
   };
-  React.useEffect(() => {
-    setLoader(true);
-    getDatas();
 
+  // Getting dropdown values
+  const handlerGetPurchaseRange = async () => {
+    await sp.web.lists
+      .getByTitle(ListName)
+      .fields.getByTitle("Purchase Price Range")
+      .get()
+      .then((res: any) => {
+        console.log(res.Choices);
+        let arrPPR = res?.Choices?.map((opt) => {
+          return {
+            key: opt,
+            text: opt,
+          };
+        });
+        setOptPurchaseRange([...arrPPR]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const handlerGetInvestorStrategy = async () => {
+    await sp.web.lists
+      .getByTitle(ListName)
+      .fields.getByTitle("Investor Strategy")
+      .get()
+      .then((res: any) => {
+        console.log(res.Choices);
+        let arrIS = res?.Choices?.map((opt) => {
+          return {
+            key: opt,
+            text: opt,
+          };
+        });
+        setOptInvStrategy([...arrIS]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const handleGetAreas = async () => {
+    await sp.web.lists
+      .getByTitle(ListName)
+      .fields.getByTitle("Areas")
+      .get()
+      .then((res: any) => {
+        console.log(res.Choices);
+        let arrAreas = res?.Choices?.map((opt) => {
+          return {
+            key: opt,
+            text: opt,
+          };
+        });
+        setOptAreas([...arrAreas]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  React.useEffect(() => {
+    getCurrentUserInfo();
+    setLoader(true);
+    handlerGetPurchaseRange();
+    handlerGetInvestorStrategy();
+    handleGetAreas();
+    getDatas();
     handleResponsiveChange();
     window.addEventListener("resize", handleResponsiveChange);
     return () => {
@@ -1110,6 +1056,39 @@ const DisclosedDetail = (props) => {
   }, []);
   return (
     <div>
+      {/* Transfer Confirmation */}
+      {isTranferModal && (
+        <>
+          <Modal
+            className="transferRequestModal"
+            styles={{
+              root: {
+                padding: "20px",
+              },
+            }}
+            isOpen={isTranferModal}
+          >
+            <p className="confrimationPopUp">
+              Are you sure you want to raise a request for a transfer?
+            </p>
+            <div className="btnSection">
+              <DefaultButton
+                text="Cancel"
+                onClick={() => SetIsTransferModal(false)}
+              />
+              <PrimaryButton
+                text="Request"
+                onClick={() => {
+                  setResponseData({ ...updateData });
+                  handlerRequestTransfer(responseData);
+                }}
+              />
+            </div>
+          </Modal>
+        </>
+      )}
+      {/* Transfer Confirmation */}
+      {/* mobile style */}
       <div
         style={{
           display: "flex",
@@ -1245,21 +1224,42 @@ const DisclosedDetail = (props) => {
               />
               <>
                 {select.singleSelect && select.multiSelect == false && (
-                  <DefaultButton
-                    iconProps={{ iconName: "Edit" }}
-                    text="Edit"
-                    styles={{
-                      root: {
-                        border: "none",
-                      },
-                    }}
-                    onClick={() => {
-                      setIsopen(true);
-                      setIsEdit(true);
-                      setResponseData({ ...updateData });
-                      //   setCurrentData([...updateData]);
-                    }}
-                  />
+                  <>
+                    {!isCurrUserItem && (
+                      <DefaultButton
+                        iconProps={{ iconName: "Share" }}
+                        text="Transfer"
+                        styles={{
+                          root: {
+                            border: "none",
+                          },
+                        }}
+                        onClick={() => {
+                          setResponseData({ ...updateData });
+                          SetIsTransferModal(true);
+                          console.log(updateData);
+                          //   setCurrentData([...updateData]);
+                        }}
+                      />
+                    )}
+                    {isCurrUserItem && (
+                      <DefaultButton
+                        iconProps={{ iconName: "Edit" }}
+                        text="Edit"
+                        styles={{
+                          root: {
+                            border: "none",
+                          },
+                        }}
+                        onClick={() => {
+                          setIsopen(true);
+                          setIsEdit(true);
+                          setResponseData({ ...updateData });
+                          //   setCurrentData([...updateData]);
+                        }}
+                      />
+                    )}
+                  </>
                 )}
 
                 {(select.singleSelect || select.multiSelect) && (
@@ -1308,6 +1308,22 @@ const DisclosedDetail = (props) => {
             onShouldVirtualize={() => {
               return false;
             }}
+            onRenderRow={(props, defaultRender) => (
+              <div className="red">
+                {defaultRender({
+                  ...props,
+                  styles: {
+                    root: {
+                      background:
+                        props.item?.PeopleEmail?.toLowerCase() !=
+                        currentUserInfo.UserPrincipalName.toLocaleLowerCase()
+                          ? "#f7f7f7"
+                          : "#ffffff",
+                    },
+                  },
+                })}
+              </div>
+            )}
           />
         )}
       </div>
@@ -1346,7 +1362,7 @@ const DisclosedDetail = (props) => {
         <Pagination
           currentPage={currentPage}
           totalPages={
-            masterData.length > 0 ? Math.ceil(masterData.length / 5) : 1
+            masterData.length > 0 ? Math.ceil(masterData.length / 30) : 1
           }
           onChange={(page) => {
             paginate(page, masterData);
@@ -1477,61 +1493,14 @@ const DisclosedDetail = (props) => {
 
             <Dropdown
               placeholder="Select an option"
-              // label="Technologies"
               selectedKeys={responseData.PurchasePriceRange}
-              // defaultSelectedKey={value.Whereat}
               multiSelect
-              options={[
-                {
-                  key: "250k",
-                  text: "250k",
-                },
-                {
-                  key: "250-300k",
-                  text: "250-300k",
-                },
-
-                {
-                  key: "300-350k",
-                  text: "300-350k",
-                },
-                {
-                  key: "350-400k",
-                  text: "350-400k",
-                },
-                {
-                  key: "400-450k",
-                  text: "400-450k",
-                },
-                {
-                  key: "500k+",
-                  text: "500k+",
-                },
-                {
-                  key: "1m+",
-                  text: "1m+",
-                },
-              ]}
+              options={optPurchaseRange}
               onChange={(e, item: IDropdownOption | IDropdownOption[]) => {
                 DropdownChange("PurchasePriceRange", item);
               }}
             />
           </div>
-          {/* Aventura
-Wellington
-Jupiter
-Coral Springs
-Cooper City
-Broadway Park
-Opa Locka
-Weston
-Hialeah
-North Miami
-Deerfield Beach
-Boca Del Mar
-Mission Bay
-Kings Point
-Miramar */}
           {/* investor strategy */}
 
           <div style={{ margin: "10px 0px 15px 0px" }}>
@@ -1546,54 +1515,7 @@ Miramar */}
               selectedKeys={responseData.InvestorStrategy}
               multiSelect
               //   defaultSelectedKey={responseData.InvestorStrategy}
-              options={[
-                {
-                  key: "Fix and Flip",
-                  text: "Fix and Flip",
-                },
-                {
-                  key: "Rental 2",
-                  text: "Rental 2 ",
-                },
-
-                {
-                  key: "Land man",
-                  text: "Land man",
-                },
-                {
-                  key: "Wholesaler",
-                  text: "Wholesaler",
-                },
-                {
-                  key: "Owner Finance",
-                  text: "Owner Finance",
-                },
-                {
-                  key: "55+ Flipper ",
-                  text: "55+ Flipper ",
-                },
-                {
-                  key: "Commercial/multifamily",
-                  text: "Commercial/multifamily",
-                },
-
-                {
-                  key: "Whale Alert",
-                  text: "Whale Alert",
-                },
-                {
-                  key: "Choice 11",
-                  text: "Choice 11",
-                },
-                {
-                  key: "New Build",
-                  text: "New Build",
-                },
-                {
-                  key: "Wholetail",
-                  text: "Wholetail",
-                },
-              ]}
+              options={optInvStrategy}
               onChange={(e, item: IDropdownOption | IDropdownOption[]) => {
                 DropdownChange("InvestorStrategy", item);
               }}
@@ -1610,138 +1532,7 @@ Miramar */}
               placeholder="Select an option"
               // defaultSelectedKey={value.Whereat}
               selectedKeys={responseData.Areas}
-              options={[
-                {
-                  key: "Broward County",
-                  text: "Broward County",
-                },
-                {
-                  key: "Palm beach county",
-                  text: "Palm beach county",
-                },
-
-                {
-                  key: "Dade County",
-                  text: "Dade County",
-                },
-                {
-                  key: "Miami, Ft Lauderdale",
-                  text: "Miami, Ft Lauderdale",
-                },
-                {
-                  key: "W Palm Beach",
-                  text: "W Palm Beach",
-                },
-                {
-                  key: "Lauderhill",
-                  text: "Lauderhill",
-                },
-                {
-                  key: "Lauderdale Lakes",
-                  text: "Lauderdale Lakes",
-                },
-
-                {
-                  key: "Lighthouse Point",
-                  text: "Lighthouse Point",
-                },
-                {
-                  key: "Pahokee, Riveria Beach",
-                  text: "Pahokee, Riveria Beach",
-                },
-                {
-                  key: "South Bay",
-                  text: "South Bay ",
-                },
-                {
-                  key: "Lake Worth Beach",
-                  text: "Lake Worth Beach",
-                },
-                {
-                  key: "Pompano Beach",
-                  text: "Pompano Beach",
-                },
-                {
-                  key: "Boynton Beach ",
-                  text: "Boynton Beach",
-                },
-                {
-                  key: "Boca Raton",
-                  text: "Boca Raton",
-                },
-                {
-                  key: "Palm Springs",
-                  text: "Palm Springs",
-                },
-                {
-                  key: "Plantation",
-                  text: "Plantation",
-                },
-                {
-                  key: "Davie",
-                  text: "Davie",
-                },
-                {
-                  key: "Hollywood",
-                  text: "Hollywood",
-                },
-                {
-                  key: "Tamarac",
-                  text: "Tamarac",
-                },
-                {
-                  key: "West Park",
-                  text: "West Park",
-                },
-                {
-                  key: "Margate",
-                  text: "Margate",
-                },
-                {
-                  key: "Dania Beach",
-                  text: "Dania Beach",
-                },
-                {
-                  key: "N Lauderdale",
-                  text: "N Lauderdale",
-                },
-                {
-                  key: "Oakland Park",
-                  text: "Oakland Park",
-                },
-                {
-                  key: "Hallandale",
-                  text: "Hallandale",
-                },
-                {
-                  key: "Coconut Creek",
-                  text: "Coconut Creek",
-                },
-                {
-                  key: "Sunrise",
-                  text: "Sunrise",
-                },
-                {
-                  key: "Pembroke Pines",
-                  text: "Pembroke Pines",
-                },
-                {
-                  key: "Lake Clark Shores",
-                  text: "Lake Clark Shores",
-                },
-                {
-                  key: "Royal Palm Beach ",
-                  text: "Royal Palm Beach ",
-                },
-                {
-                  key: "Lantana",
-                  text: "Lantana",
-                },
-                {
-                  key: "Parkland",
-                  text: "Parkland",
-                },
-              ]}
+              options={optAreas}
               multiSelect
               onChange={(e, item: IDropdownOption | IDropdownOption[]) => {
                 DropdownChange("Areas", item);
@@ -2056,7 +1847,6 @@ Miramar */}
           />
         </div>
       </Modal>
-      {/* mobile style */}
 
       <div
         className={`filter_container ${
