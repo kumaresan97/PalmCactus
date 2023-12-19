@@ -128,7 +128,7 @@ const _data: IList = {
 
 let attachFiles: any[] = [];
 let files: any[] = [];
-let totalPage: number = 5;
+let totalPage: number = 30;
 let currentPage = 1;
 
 let objFilter = {
@@ -137,7 +137,8 @@ let objFilter = {
   User: "",
 };
 let objCurrentUserInfo: ICurrentUserInfo = null;
-const ListName: string = "Disclosed Investors Devlist";
+// const ListName: string = "Disclosed Investors Devlist";
+const ListName: string = "Disclosed Investors";
 
 // AssigedTo EMail as PeopleEmail;
 const DisclosedDetail = (props) => {
