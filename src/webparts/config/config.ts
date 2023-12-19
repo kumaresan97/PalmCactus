@@ -21,6 +21,12 @@ interface IList {
   Modified: string;
   ModifiedBy: string;
 }
+interface ICurrentUserInfo {
+  Email: string;
+  Id: number;
+  Title: string;
+  UserPrincipalName: string;
+}
 
 export namespace Config {
   export const ListName = {
@@ -32,4 +38,4 @@ export namespace Config {
   };
 }
 
-export { IList };
+export { IList, ICurrentUserInfo };

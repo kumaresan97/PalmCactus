@@ -10,20 +10,21 @@
     "serve": "gulp bundle --custom-serve --max_old_space_size=4096 && fast-serve"
   },
   "dependencies": {
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
-    "office-ui-fabric-react": "7.174.1",
+    "@fluentui/react": "^8.106.9",
     "@microsoft/sp-core-library": "1.14.0",
-    "@microsoft/sp-property-pane": "1.14.0",
-    "@microsoft/sp-webpart-base": "1.14.0",
     "@microsoft/sp-lodash-subset": "1.14.0",
     "@microsoft/sp-office-ui-fabric-core": "1.14.0",
+    "@microsoft/sp-property-pane": "1.14.0",
+    "@microsoft/sp-webpart-base": "1.14.0",
     "@pnp/sp": "^2.11.0",
-    "@fluentui/react": "^8.106.9",
-    "spfx-fast-serve": "^3.0.6",
-    "moment": "^2.29.4",
     "@pnp/spfx-controls-react": "^3.8.0",
-    "office-ui-fabric-react-pagination": "0.0.8"
+    "alertifyjs": "^1.13.1",
+    "moment": "^2.29.4",
+    "office-ui-fabric-react": "7.174.1",
+    "office-ui-fabric-react-pagination": "0.0.8",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "spfx-fast-serve": "^3.0.6"
   },
   "devDependencies": {
     "@types/react": "16.9.51",

@@ -27,7 +27,8 @@ let DataArray: any[] = [];
 let arrSecondary: any[] = [];
 let isActive = false;
 let Hamburger_img: string = require("../assets/filter-filled-tool-symbol.png");
-// let listName = "S Florida Properties";search
+// let listName = "S Florida Properties";
+// search
 let listName = "S Florida Dev";
 interface Data {
   selected?: boolean;
@@ -484,7 +485,20 @@ const MainComponent = (props) => {
         myHeaders.append("Authorization", `Bearer ${result.access_token}`);
         // To Get All the Items from Trestle
         fetch(
-          `https://api-prod.corelogic.com/trestle/odata/Property?$filter=BuyerAgentMlsId eq '${value.Title}'`,
+          `https://api-prod.corelogic.com/trestle/odata/Property?$top=1000&$skip=0`,
+          {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow",
+          }
+        )
+          .then((response) => response.json())
+          .then((result) => {
+            console.log(result.value);
+          })
+          .catch((error) => console.log("error", error));
+        fetch(
+          `https://api-prod.corelogic.com/trestle/odata/Property?$filter=CoBuyerAgentMlsId eq 'R${value.Title}'`,
           {
             method: "GET",
             headers: myHeaders,
@@ -504,6 +518,7 @@ const MainComponent = (props) => {
               FormData.AgentName = "";
               FormData.AgentNumber = "";
               FormData.PeopleEmail = "";
+              FormData.Sold4 = "";
               console.log(FormData);
               setvalue({ ...FormData });
             } else {
@@ -511,9 +526,13 @@ const MainComponent = (props) => {
               FormData.PropertyAddress = objSelectedProperty.UnparsedAddress;
               FormData.Status = objSelectedProperty.MlsStatus;
               FormData.Price = objSelectedProperty.ListPrice;
-              FormData.AgentName = objSelectedProperty.BuyerAgentFullName;
-              FormData.AgentNumber = objSelectedProperty.BuyerAgentDirectPhone;
-              FormData.PeopleEmail = objSelectedProperty.BuyerAgentEmail;
+              FormData.AgentName = objSelectedProperty.ListAgentFullName;
+              FormData.AgentNumber = objSelectedProperty.ListAgentDirectPhone;
+              FormData.Email = objSelectedProperty.ListAgentEmail;
+              FormData.Sold4 =
+                objSelectedProperty.MlsStatus == "Closed"
+                  ? objSelectedProperty.ClosePrice
+                  : "";
               console.log(FormData);
               setvalue({ ...FormData });
             }
@@ -886,7 +905,7 @@ const MainComponent = (props) => {
         OffMarket: value.OffMarket ? value.OffMarket : false,
         Sold4:
           value.Sold4 !== undefined
-            ? parseFloat(value.Sold4.replace(/[^0-9.-]+/g, ""))
+            ? parseFloat(value.Sold4.toString().replace(/[^0-9.-]+/g, ""))
             : 0, // OfferContract: value.OfferContract,
         AgentNumber: value.AgentNumber ? value.AgentNumber : "",
         Email: value.Email ? value.Email : "",
@@ -1590,7 +1609,9 @@ const MainComponent = (props) => {
                 {/* //lastchange */}
                 <IconButton
                   onClick={() => {
-                    handlerApiFetch();
+                    value.Title == ""
+                      ? alert("Please enter valid MLS No")
+                      : handlerApiFetch();
                   }}
                   className={styles.btnSearchIcon}
                   iconProps={{ iconName: "Search" }}
