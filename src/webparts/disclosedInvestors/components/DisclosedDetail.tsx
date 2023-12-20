@@ -480,6 +480,7 @@ const DisclosedDetail = (props) => {
         UserPrincipalName: res.UserPrincipalName,
       };
       setIsAdmin(
+        // res.UserPrincipalName.toLocaleLowerCase() === "chandru@palmcactus.com"
         res.UserPrincipalName.toLocaleLowerCase() === "jason@palmcactus.com"
       );
       setCurrentUserInfo({ ...objCurrentUserInfo });
@@ -1226,7 +1227,7 @@ const DisclosedDetail = (props) => {
               <>
                 {select.singleSelect && select.multiSelect == false && (
                   <>
-                    {!isCurrUserItem && (
+                    {(!isCurrUserItem || isAdmin) && (
                       <DefaultButton
                         iconProps={{ iconName: "Share" }}
                         text="Transfer"
@@ -1243,7 +1244,7 @@ const DisclosedDetail = (props) => {
                         }}
                       />
                     )}
-                    {isCurrUserItem && (
+                    {(isCurrUserItem || isAdmin) && (
                       <DefaultButton
                         iconProps={{ iconName: "Edit" }}
                         text="Edit"
