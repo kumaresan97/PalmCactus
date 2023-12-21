@@ -1227,7 +1227,7 @@ const DisclosedDetail = (props) => {
               <>
                 {select.singleSelect && select.multiSelect == false && (
                   <>
-                    {(!isCurrUserItem || isAdmin) && (
+                    {!isCurrUserItem && !isAdmin && (
                       <DefaultButton
                         iconProps={{ iconName: "Share" }}
                         text="Transfer"
