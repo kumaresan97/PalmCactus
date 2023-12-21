@@ -446,8 +446,7 @@ const DisclosedDetail = (props) => {
       isResizable: true,
 
       onRender: (item: any) => {
-        return isAdmin ||
-          item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+        return (
           <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
             {item.attachments.map((att, index) => (
               <li title={att.fileName} key={index}>
@@ -463,10 +462,30 @@ const DisclosedDetail = (props) => {
               </li>
             ))}
           </ul>
-        ) : (
-          ""
         );
       },
+      // onRender: (item: any) => {
+      //   return isAdmin ||
+      //     item.PeopleEmail.toLowerCase() == _curUser.toLowerCase() ? (
+      //     <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
+      //       {item.attachments.map((att, index) => (
+      //         <li title={att.fileName} key={index}>
+      //           <a
+      //             className="text_ellipsis"
+      //             style={{ color: "#605E5C", cursor: "pointer" }}
+      //             href={att.serverRelativeUrl}
+      //             target="_blank"
+      //             rel="noopener noreferrer"
+      //           >
+      //             {att.fileName}
+      //           </a>
+      //         </li>
+      //       ))}
+      //     </ul>
+      //   ) : (
+      //     ""
+      //   );
+      // },
     },
   ];
   // get currentUserINfo
