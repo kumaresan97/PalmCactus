@@ -600,27 +600,27 @@ const DisclosedDetail = (props) => {
       }
     }
 
-    if (key === "InvestorName") {
-      const trimmedValue = _value.trim();
-      if (trimmedValue === "") {
-        err[key] = "Title is required";
-      } else {
-        const titleExists = masterData.some((item) => {
-          return (
-            item.InvestorName.toLowerCase().trim() ===
-              trimmedValue.toLowerCase() && item.ID !== FormData.ID
-          );
-        });
+    // if (key === "InvestorName") {
+    //   const trimmedValue = _value.trim();
+    //   if (trimmedValue === "") {
+    //     err[key] = "Title is required";
+    //   } else {
+    //     const titleExists = masterData.some((item) => {
+    //       return (
+    //         item.InvestorName.toLowerCase().trim() ===
+    //           trimmedValue.toLowerCase() && item.ID !== FormData.ID
+    //       );
+    //     });
 
-        if (titleExists) {
-          err[key] = "This value already exists";
-          // newErrors["Mls"] = "This value already exists ";
-        } else {
-          err[key] = "";
-          // newErrors["Mls"] = "";
-        }
-      }
-    }
+    //     if (titleExists) {
+    //       err[key] = "This value already exists";
+    //       // newErrors["Mls"] = "This value already exists ";
+    //     } else {
+    //       err[key] = "";
+    //       // newErrors["Mls"] = "";
+    //     }
+    //   }
+    // }
     setError({ ...err });
     // setCurrentData([...FormData]);
 
@@ -1416,6 +1416,7 @@ const DisclosedDetail = (props) => {
               title="Close"
               onClick={() => {
                 setIsopen(false);
+                // setSelect({ ...select });
                 setError({
                   InvestorName: "",
 
@@ -1440,7 +1441,7 @@ const DisclosedDetail = (props) => {
               value={responseData.InvestorName ? responseData.InvestorName : ""}
               //   // id="Email"
               //   // name="Email"
-              errorMessage={error.InvestorName ? error.InvestorName : ""}
+              // errorMessage={error.InvestorName ? error.InvestorName : ""}
               onChange={(e, val) => {
                 onChangeValues("InvestorName", val);
               }}

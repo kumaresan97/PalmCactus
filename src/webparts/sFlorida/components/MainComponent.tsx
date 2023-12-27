@@ -497,8 +497,9 @@ const MainComponent = (props) => {
             console.log(result.value);
           })
           .catch((error) => console.log("error", error));
+        // To get selected
         fetch(
-          `https://api-prod.corelogic.com/trestle/odata/Property?$filter=CoBuyerAgentMlsId eq 'R${value.Title}'`,
+          `https://api-prod.corelogic.com/trestle/odata/Property?$filter=ListingId eq '${value.Title}'`,
           {
             method: "GET",
             headers: myHeaders,
