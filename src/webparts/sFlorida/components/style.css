@@ -56,7 +56,8 @@ div#CommentsWrapper {
 
 .pagination .ms-Button.ms-Button--primary .ms-Button-label {
   color: #fff;
-  background: #202945;
+  /* background: #202945; */
+  background: #7a7574;
   padding: 10px 14px;
   border-radius: 50%;
 }
