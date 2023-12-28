@@ -4,6 +4,7 @@ import { IDisclosedInvestorsProps } from "./IDisclosedInvestorsProps";
 import { escape } from "@microsoft/sp-lodash-subset";
 import { sp } from "@pnp/sp/presets/all";
 import DisclosedDetail from "./DisclosedDetail";
+import "primereact/resources/themes/bootstrap4-light-blue/theme.css";
 
 export default class DisclosedInvestors extends React.Component<
   IDisclosedInvestorsProps,

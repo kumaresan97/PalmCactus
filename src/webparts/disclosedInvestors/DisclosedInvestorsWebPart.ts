@@ -10,7 +10,9 @@ import { IReadonlyTheme } from "@microsoft/sp-component-base";
 
 import * as strings from "DisclosedInvestorsWebPartStrings";
 import DisclosedInvestors from "./components/DisclosedInvestors";
+import { SPComponentLoader } from "@microsoft/sp-loader";
 import { IDisclosedInvestorsProps } from "./components/IDisclosedInvestorsProps";
+require("../../../node_modules/primereact/resources/primereact.min.css");
 
 export interface IDisclosedInvestorsWebPartProps {
   description: string;
@@ -24,6 +26,11 @@ export default class DisclosedInvestorsWebPart extends BaseClientSideWebPart<IDi
     this._environmentMessage = this._getEnvironmentMessage();
 
     return super.onInit();
+  }
+
+  public constructor() {
+    super();
+    SPComponentLoader.loadCss("https://unpkg.com/primeicons/primeicons.css");
   }
 
   public render(): void {

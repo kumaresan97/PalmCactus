@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
+import { MultiSelect } from "primereact/multiselect";
+
 import { Item, sp } from "@pnp/sp/presets/all";
 import {
   SelectionMode,
@@ -20,6 +22,7 @@ import {
   SearchBox,
   ShimmeredDetailsList,
   TooltipHost,
+  ComboBox,
 } from "@fluentui/react";
 // import { ShimmeredDetailsList } from "@fluentui/react/lib/ShimmeredDetailsList";
 import { Panel } from "@fluentui/react/lib/Panel";
@@ -37,6 +40,11 @@ import "./Style.css";
 import * as strings from "SFloridaWebPartStrings";
 import { values } from "office-ui-fabric-react";
 import * as alertify from "alertifyjs";
+// import Checkbox1 from "@material-ui/core/Checkbox";
+// import TextField1 from "@material-ui/core/TextField";
+// import Autocomplete from "@material-ui/lab/Autocomplete";
+// import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+// import CheckBoxIcon from "@material-ui/icons/CheckBox";
 let img: string = require("../assets/Filter.png");
 
 //styles
@@ -110,6 +118,7 @@ const _data: IList = {
   PurchasePriceRange: [],
   Notes: "",
   InvestorStrategy: [],
+  // InvestorStrategy: null,
   ContactID: "",
   FileID: "",
   AssignedTo: null,
@@ -127,7 +136,6 @@ const _data: IList = {
 };
 
 let attachFiles: any[] = [];
-let files: any[] = [];
 let totalPage: number = 30;
 let currentPage = 1;
 
@@ -141,7 +149,12 @@ let objCurrentUserInfo: ICurrentUserInfo = null;
 const ListName: string = "Disclosed Investors";
 
 // AssigedTo EMail as PeopleEmail;
+
+let Invester = [];
 const DisclosedDetail = (props) => {
+  // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+  // const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
   const [state, setState] = useState<IList[]>([]);
   const [masterData, setMasterData] = useState([]);
   const [hamburgerActive, setHamburgerActive] = useState(false);
@@ -168,6 +181,7 @@ const DisclosedDetail = (props) => {
 
     Email: "",
     Phone: "",
+    AssignedTo: "",
   });
   const [isopen, setIsopen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -186,7 +200,8 @@ const DisclosedDetail = (props) => {
   const [optPurchaseRange, setOptPurchaseRange] = useState([
     { key: "", text: "" },
   ]);
-  const [optInvStrategy, setOptInvStrategy] = useState([{ key: "", text: "" }]);
+  const [optInvStrategy, setOptInvStrategy] = useState([]);
+  const [attach, setAttach] = useState([]);
   const [optAreas, setOptAreas] = useState([{ key: "", text: "" }]);
   const col: IColumn[] = [
     {
@@ -329,7 +344,7 @@ const DisclosedDetail = (props) => {
 
     {
       key: "column6",
-      name: "DisclosedUrl",
+      name: "Disclosed Url",
       fieldName: "",
       minWidth: 100,
       maxWidth: 200,
@@ -340,7 +355,7 @@ const DisclosedDetail = (props) => {
     },
     {
       key: "column6",
-      name: "AssignedTo",
+      name: "Assigned To",
       fieldName: "AssignedName",
       minWidth: 100,
       maxWidth: 200,
@@ -349,7 +364,7 @@ const DisclosedDetail = (props) => {
 
     {
       key: "column6",
-      name: "Created",
+      name: "Created On",
       fieldName: "Created",
       minWidth: 100,
       maxWidth: 200,
@@ -386,7 +401,7 @@ const DisclosedDetail = (props) => {
     },
     {
       key: "column6",
-      name: "Modified",
+      name: "Modified On",
       fieldName: "Modified",
       minWidth: 100,
       maxWidth: 200,
@@ -600,6 +615,14 @@ const DisclosedDetail = (props) => {
       }
     }
 
+    if (key == "AssignedTo") {
+      if (_value == null) {
+        err[key] = "Please enter user name or email addres";
+      } else {
+        err[key] = "";
+      }
+    }
+
     // if (key === "InvestorName") {
     //   const trimmedValue = _value.trim();
     //   if (trimmedValue === "") {
@@ -624,20 +647,26 @@ const DisclosedDetail = (props) => {
     setError({ ...err });
     // setCurrentData([...FormData]);
 
+    setAttach(FormData.attachments ? [...FormData.attachments] : []);
+
     setResponseData({ ...FormData });
   };
   const DropdownChange = (key, val) => {
+    console.log(val, "val");
     let x = { ...responseData };
     if (
       key == "PurchasePriceRange" ||
       key == "Areas" ||
       key == "InvestorStrategy"
     ) {
+      // x[key] = val;
       x[key] = val.selected
         ? [...x[key], val.text as string]
         : x[key].filter((a) => a !== val.key);
     }
     // setCurrentData([...x]);
+    console.log(x, "x");
+
     setResponseData({ ...x });
   };
   const addItem = () => {
@@ -645,6 +674,11 @@ const DisclosedDetail = (props) => {
     setIsEdit(false);
 
     setLoader(true);
+    // let _multiChoice = [];
+    // _multiChoice = responseData.InvestorStrategy?.map((e: any) => {
+    //   return e.name;
+    // });
+
     let val = {
       Title: responseData.InvestorName,
       field_1: responseData.LLC,
@@ -656,6 +690,7 @@ const DisclosedDetail = (props) => {
       //   ContactID: responseData.ContactID,
       //   FileID: responseData.FileID,
       InvestorStrategy: { results: responseData.InvestorStrategy },
+      // InvestorStrategy: { results: _multiChoice },
       DisclosureUrl: {
         Description: responseData.Text,
         Url: responseData.Url,
@@ -663,46 +698,65 @@ const DisclosedDetail = (props) => {
 
       AssignedToId: responseData.AssignedTo,
     };
-    SPServices.SPAddItem({
-      // Listname: "Disclosed Investors Dev",
-      Listname: ListName,
-      RequestJSON: val,
-    })
-      .then(async (res) => {
-        let x = responseData.attachments.filter((a) => {
-          return a.isDelete != true;
-        });
-        let countNew = 0;
-        for (let i = 0; i < x.length; i++) {
-          await sp.web.lists
-            // .getByTitle("Disclosed Investors Dev")
-            .getByTitle(ListName)
 
-            .items.getById(res.data.Id)
-            .attachmentFiles.add(x[i].fileName, x[i].content)
-            .then(async (res) => {
-              countNew = countNew + 1;
-              if (countNew >= x.length) {
-                await getDatas();
-                // setCurrentData([...Datas]);
-                setResponseData({ ..._data });
-                // SetReRender(true);
-              }
-            })
-            .catch((err) => {
-              setLoader(false);
-              console.log(err);
-            });
-        }
-        setLoader(false);
+    if (responseData.AssignedTo == null) {
+      error.AssignedTo = "Please enter the user name or  email address";
+      setError({ ...error });
+    } else {
+      // Validation passed, handle submission
+      error.AssignedTo = "";
+      setError({ ...error });
+      // Add logic to submit the selected options
+    }
 
-        getDatas();
+    if (responseData.AssignedTo !== null) {
+      SPServices.SPAddItem({
+        // Listname: "Disclosed Investors Dev",
+        Listname: ListName,
+        RequestJSON: val,
       })
+        .then(async (res) => {
+          debugger;
 
-      .catch((err) => {
-        console.log(err);
-        setLoader(false);
-      });
+          let x = responseData.attachments.filter((a) => {
+            return a.isDelete != true;
+          });
+          let countNew = 0;
+          for (let i = 0; i < x.length; i++) {
+            await sp.web.lists
+              // .getByTitle("Disclosed Investors Dev")
+              .getByTitle(ListName)
+
+              .items.getById(res.data.Id)
+              .attachmentFiles.add(x[i].fileName, x[i].content)
+              .then(async (res) => {
+                countNew = countNew + 1;
+                if (countNew >= x.length) {
+                  await getDatas();
+                  // setCurrentData([...Datas]);
+                  setResponseData({ ..._data });
+                  // SetReRender(true);
+                }
+              })
+              .catch((err) => {
+                setLoader(false);
+                console.log(err);
+              });
+          }
+          setLoader(false);
+
+          getDatas();
+        })
+
+        .catch((err) => {
+          console.log(err);
+          setLoader(false);
+        });
+    } else {
+      setIsopen(true);
+      // setError({ ...error });
+      setLoader(false);
+    }
   };
 
   //select item
@@ -734,15 +788,48 @@ const DisclosedDetail = (props) => {
     },
   });
 
+  const handleSelection = (selectedItem) => {
+    if (selectedItem && isCurrUserItem) {
+      setIsopen(true);
+      setIsEdit(true);
+      setResponseData({ ...selectedItem });
+    } else {
+      setIsEdit(false);
+
+      setIsopen(false);
+    }
+  };
+
+  const _deleteAttach = async (data, Id) => {
+    if (attach.length) {
+      attach.forEach(async (val) => {
+        await sp.web.lists
+          .getByTitle(ListName)
+          .items.getById(responseData.ID)
+          .attachmentFiles.getByName(val.fileName)
+          .delete()
+          .then(async (res) => {
+            await addDataAfterEdit(data, Id);
+          })
+          .catch((error) => {
+            setLoader(false);
+          });
+      });
+    } else {
+      await addDataAfterEdit(data, Id);
+    }
+  };
+
   //getfiles
 
   const getFile = (e: any) => {
+    let files: any[] = [];
+    attachFiles = [];
+    debugger;
+
+    attachFiles = [...responseData.attachments];
     files = e.target.files;
-    // document.getElementById("att").focus();
-    // let testArr = [...currentData];
-    let testArr: IList = { ...responseData };
-    testArr.attachments = attachFiles;
-    // attachFiles = [...currentData[0].attachments];
+
     for (let i = 0; i < files.length; i++) {
       attachFiles.push({
         fileName: files[i].name,
@@ -753,8 +840,15 @@ const DisclosedDetail = (props) => {
         itemId: responseData.ID,
       });
     }
+
+    setResponseData({ ...responseData, attachments: attachFiles });
+
+    // document.getElementById("att").focus();
+    // let testArr = [...currentData];
+    // let testArr: IList = { ...responseData };
+    // testArr.attachments = attachFiles;
+    // attachFiles = [...currentData[0].attachments];
     // setCurrentData(testArr);
-    setResponseData({ ...testArr });
     // setCurrentData(
     //     [...currentData[0].attachments])
     // setCurrentData({...currentData,currentData[0].attachments:[...attachFiles]]};
@@ -766,12 +860,14 @@ const DisclosedDetail = (props) => {
   const calcelAttach = (index) => {
     let test = { ...responseData };
     let temp = test.attachments;
+    debugger;
+
     if (temp[index].isNew) {
       temp.splice(index, 1);
     } else {
       temp[index].isDelete = true;
     }
-    // setCurrentData(test);
+
     setResponseData({ ...test });
   };
   const UpdateItem = () => {
@@ -803,45 +899,54 @@ const DisclosedDetail = (props) => {
 
       AssignedToId: responseData.AssignedTo,
     };
-
-    SPServices.SPUpdateItem({
-      // Listname: "Disclosed Investors Dev",
-      Listname: ListName,
-      ID: responseData.ID,
-      RequestJSON: update,
-    })
-      .then((res) => {
-        let todelete = responseData.attachments.filter((val) => {
-          return val.isNew == false && val.isDelete == true;
-        });
-        let toadd = responseData.attachments.filter((val) => {
-          return val.isNew == true && val.isDelete == false;
-        });
-
-        if (todelete.length > 0) {
-          todelete.forEach((val, i) => {
-            sp.web.lists
-              // .getByTitle("Disclosed Investors Dev")
-              .getByTitle(ListName)
-              .items.getById(responseData.ID)
-              .attachmentFiles.getByName(val.fileName)
-              .delete()
-              .then((res) => {
-                addDataAfterEdit(toadd, responseData.ID);
-              })
-              .catch((error) => {
-                setLoader(false);
-              });
-          });
-        } else {
-          addDataAfterEdit(toadd, responseData.ID);
-        }
+    if (responseData.AssignedTo !== null) {
+      SPServices.SPUpdateItem({
+        // Listname: "Disclosed Investors Dev",
+        Listname: ListName,
+        ID: responseData.ID,
+        RequestJSON: update,
       })
-      .catch((err) => {
-        console.log(err);
-        setLoader(false);
-        setIsopen(false);
-      });
+        .then((res) => {
+          debugger;
+
+          let todelete = responseData.attachments.filter((val) => {
+            return val.isNew == false && val.isDelete == true;
+          });
+          let toadd = responseData.attachments.filter((val) => {
+            return val.isNew == true && val.isDelete == false;
+          });
+
+          if (todelete.length > 0) {
+            todelete.forEach(async (val, i) => {
+              await sp.web.lists
+                // .getByTitle("Disclosed Investors Dev")
+                .getByTitle(ListName)
+                .items.getById(responseData.ID)
+                .attachmentFiles.getByName(val.fileName)
+                .delete()
+                .then((res) => {
+                  if (todelete.length === i + 1) {
+                    addDataAfterEdit(toadd, responseData.ID);
+                  }
+                })
+                .catch((error) => {
+                  setLoader(false);
+                });
+            });
+          } else {
+            // _deleteAttach(toadd, responseData.ID);
+            addDataAfterEdit(toadd, responseData.ID);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoader(false);
+          setIsopen(false);
+        });
+    } else {
+      setIsopen(true);
+      setLoader(false);
+    }
   };
 
   async function addDataAfterEdit(data, Id) {
@@ -862,6 +967,8 @@ const DisclosedDetail = (props) => {
 
         .attachmentFiles.addMultiple(newData)
         .then((arr) => {
+          setError({ ...error });
+
           setIsopen(false);
           getDatas();
         })
@@ -1031,13 +1138,34 @@ const DisclosedDetail = (props) => {
       .get()
       .then((res: any) => {
         console.log(res.Choices);
-        let arrIS = res?.Choices?.map((opt) => {
-          return {
+        Invester = [];
+        res?.Choices?.map((opt) => {
+          // return {
+          //   key: opt,
+          //   text: opt,
+          // };
+          Invester.push({
             key: opt,
             text: opt,
-          };
+          });
+          // return {
+          //   name: opt,
+          //   code: opt,
+          // };
         });
-        setOptInvStrategy([...arrIS]);
+        Invester.sort(function (a, b) {
+          if (a.key < b.key) {
+            return -1;
+          }
+          if (a.key > b.key) {
+            return 1;
+          }
+          return 0;
+        });
+        // arrIS.sort((a, b) => a.toLowerCase().key - b.toLowerCase().key);
+        // console.log(x, "arrIS");
+
+        setOptInvStrategy([...Invester]);
       })
       .catch((err) => {
         console.log(err);
@@ -1055,6 +1183,16 @@ const DisclosedDetail = (props) => {
             key: opt,
             text: opt,
           };
+        });
+
+        arrAreas.sort(function (a, b) {
+          if (a.key < b.key) {
+            return -1;
+          }
+          if (a.key > b.key) {
+            return 1;
+          }
+          return 0;
         });
         setOptAreas([...arrAreas]);
       })
@@ -1249,7 +1387,7 @@ const DisclosedDetail = (props) => {
                     {!isCurrUserItem && !isAdmin && (
                       <DefaultButton
                         iconProps={{ iconName: "Share" }}
-                        text="Transfer"
+                        text="Transfer request"
                         styles={{
                           root: {
                             border: "none",
@@ -1325,7 +1463,7 @@ const DisclosedDetail = (props) => {
             columns={col}
             selection={itemSelection}
             selectionMode={SelectionMode.multiple}
-            // onItemInvoked={handleSelection}
+            onItemInvoked={handleSelection}
             onShouldVirtualize={() => {
               return false;
             }}
@@ -1408,8 +1546,8 @@ const DisclosedDetail = (props) => {
             }}
           >
             <h3 style={{ fontSize: "16px", fontWeight: "bolder", margin: 0 }}>
-              {/* {!isEdit ? "Add new record" : "Update the record"} */}
-              Add New
+              {!isEdit ? "Add new record" : "Update the record"}
+              {/* Add New */}
             </h3>
             <IconButton
               iconProps={{ iconName: "cancel" }}
@@ -1422,6 +1560,7 @@ const DisclosedDetail = (props) => {
 
                   Email: "",
                   Phone: "",
+                  AssignedTo: "",
                 });
               }}
             />
@@ -1532,16 +1671,47 @@ const DisclosedDetail = (props) => {
             </div>
 
             <Dropdown
+              options={optInvStrategy}
               placeholder="Select an option"
               // label="Technologies"
               selectedKeys={responseData.InvestorStrategy}
               multiSelect
-              //   defaultSelectedKey={responseData.InvestorStrategy}
-              options={optInvStrategy}
+              //  defaultSelectedKey={responseData.InvestorStrategy}
               onChange={(e, item: IDropdownOption | IDropdownOption[]) => {
                 DropdownChange("InvestorStrategy", item);
               }}
             />
+            {/* <Autocomplete
+              multiple
+              id="checkboxes-tags-demo"
+              options={optInvStrategy}
+              disableCloseOnSelect
+              getOptionLabel={(option) => option.name}
+              onChange={(e, item) => {
+                DropdownChange("InvestorStrategy", item);
+              }}
+              // onChange={handleChange} // Handle the onChange event
+              value={responseData.InvestorStrategy} // Pass the selected value to the Autocomplete component
+              renderOption={(option, { selected }) => (
+                <li {...props}>
+                  <Checkbox1
+                    icon={icon}
+                    checkedIcon={checkedIcon}
+                    style={{ marginRight: 8 }}
+                    checked={selected}
+                  />
+                  {option.name}
+                </li>
+              )}
+              style={{ width: 500 }}
+              renderInput={(params) => (
+                <TextField1
+                  {...params}
+                  label="Checkboxes"
+                  placeholder="Favorites"
+                />
+              )}
+            /> */}
           </div>
 
           <div style={{ margin: "10px 0px 15px 0px" }}>
@@ -1598,6 +1768,7 @@ const DisclosedDetail = (props) => {
               showtooltip={true}
               // required={true}
               ensureUser={true}
+              errorMessage={error.AssignedTo ? error.AssignedTo : ""}
               placeholder="Enter a name or email address"
               // showHiddenInUI={false}
               showHiddenInUI={true}
@@ -1610,6 +1781,7 @@ const DisclosedDetail = (props) => {
               onChange={(items: any[]) => {
                 if (items.length > 0) {
                   const selectedItem = items[0];
+
                   onChangeValues("AssignedTo", selectedItem.id);
                   // getonChange("PeopleEmail", selectedItem.secondaryText);
                 } else {
@@ -1755,7 +1927,8 @@ const DisclosedDetail = (props) => {
                 error.InvestorName ||
                 error.Email ||
                 error.Phone
-                  ? true
+                  ? // !responseData.AssignedTo
+                    true
                   : false
               }
               text={isEdit ? "Update" : "Save"}
@@ -1781,6 +1954,7 @@ const DisclosedDetail = (props) => {
 
                   Email: "",
                   Phone: "",
+                  AssignedTo: "",
                 });
               }}
               text="Cancel"

@@ -6,6 +6,7 @@ interface IList {
   PurchasePriceRange: string[];
   Notes: string;
   InvestorStrategy: string[];
+  // InvestorStrategy: null;
   ContactID: string;
   FileID: string;
   AssignedTo: number;
