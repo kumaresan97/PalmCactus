@@ -22,6 +22,7 @@ import Pagination from "office-ui-fabric-react-pagination";
 import { Spinner, SpinnerSize } from "@fluentui/react/lib/Spinner";
 import * as moment from "moment";
 import styles from "./SFlorida.module.scss";
+import { getAlphabets, getNumbersAndSPLChars } from "../Utils/validations";
 
 let DataArray: any[] = [];
 let arrSecondary: any[] = [];
@@ -177,6 +178,7 @@ const MainComponent = (props) => {
       color: "#fff",
     },
   };
+
   const columns = [
     {
       key: "Title",
@@ -229,8 +231,11 @@ const MainComponent = (props) => {
       isResizable: true,
       onRender: (Item: any) => {
         return (
-          <div title={`${Item.AssignedTo}`}>
-            <p className="text_ellipsis">{Item.AssignedTo}</p>
+          // <div title={`${Item.AssignedTo}`}>
+          //   <p className="text_ellipsis">{Item.AssignedTo}</p>
+          // </div>
+          <div title={`${Item.AssNameignedTo}`}>
+            <p className="text_ellipsis">{Item.Name}</p>
           </div>
         );
       },
@@ -285,7 +290,7 @@ const MainComponent = (props) => {
       isResizable: true,
       onRender: (item: any) => {
         return item.OfferContract
-          ? `$${item.OfferContract.toLocaleString("en-US")}`
+          ? `$${Number(item.OfferContract)?.toLocaleString("en-US")}`
           : "";
       },
     },
@@ -496,6 +501,8 @@ const MainComponent = (props) => {
           .then((response) => response.json())
           .then((result) => {
             console.log(result.value);
+            setSelect(false);
+            setMultiSelect(false);
           })
           .catch((error) => console.log("error", error));
         // To get selected
@@ -745,6 +752,9 @@ const MainComponent = (props) => {
 
     setIsPane(false);
     setLoader(true);
+    setSelect(false);
+    setMultiSelect(false);
+
     sp.web.lists
       .getByTitle(listName)
       .items.getById(Id)
@@ -1343,29 +1353,29 @@ const MainComponent = (props) => {
                   // setvalue({ ...value });
                 }}
               />
-              {select && (
-                <>
-                  {!multiSelect && (
-                    <DefaultButton
-                      text="Edit"
-                      iconProps={{ iconName: "Edit" }}
-                      // styles={buttonstyle}
+              <>
+                {select && !multiSelect && (
+                  <DefaultButton
+                    text="Edit"
+                    iconProps={{ iconName: "Edit" }}
+                    // styles={buttonstyle}
 
-                      styles={{
-                        root: {
-                          border: "none", // Remove the border
-                        },
-                      }}
-                      onClick={(e: any) => {
-                        setIsEdit(true);
+                    styles={{
+                      root: {
+                        border: "none", // Remove the border
+                      },
+                    }}
+                    onClick={(e: any) => {
+                      setIsEdit(true);
 
-                        setIsPane(true);
-                        setvalue({ ...editdata });
-                        GetAddachment();
-                      }}
-                    />
-                  )}
+                      setIsPane(true);
+                      setvalue({ ...editdata });
+                      GetAddachment();
+                    }}
+                  />
+                )}
 
+                {select || multiSelect ? (
                   <IconButton
                     // text="Delete"
                     title="Delete"
@@ -1385,8 +1395,10 @@ const MainComponent = (props) => {
                       setIsPane(false);
                     }}
                   />
-                </>
-              )}
+                ) : (
+                  ""
+                )}
+              </>
             </>
           )}
         </div>
@@ -1595,7 +1607,7 @@ const MainComponent = (props) => {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
+                  alignItems: "flex-start",
                 }}
               >
                 <TextField
@@ -1874,7 +1886,9 @@ const MainComponent = (props) => {
                 // id="Sold 4"
                 // name="Sold 4"
                 onChange={(e, val) => {
-                  getonChange("AgentName", val);
+                  let sanitizedValue = getAlphabets(val);
+
+                  getonChange("AgentName", sanitizedValue);
                 }}
               />
             </div>
@@ -1892,7 +1906,8 @@ const MainComponent = (props) => {
                 // id="Sold 4"
                 // name="Sold 4"
                 onChange={(e, val) => {
-                  getonChange("AgentNumber", val);
+                  let sanitizedValue = getNumbersAndSPLChars(val);
+                  getonChange("AgentNumber", sanitizedValue);
                 }}
               />
             </div>
