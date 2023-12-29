@@ -50,9 +50,9 @@ let img: string = require("../assets/Filter.png");
 //styles
 const buttonstyle = {
   root: {
-    background: "#02767a",
+    // background: "#02767a",
     color: "#fff",
-    border: "1px solid #02767a",
+    // border: "1px solid #02767a",
   },
   rootHovered: {
     backgroundColor: "#02767a",
@@ -825,7 +825,6 @@ const DisclosedDetail = (props) => {
   const getFile = (e: any) => {
     let files: any[] = [];
     attachFiles = [];
-    debugger;
 
     attachFiles = [...responseData.attachments];
     files = e.target.files;
@@ -858,18 +857,38 @@ const DisclosedDetail = (props) => {
   //cancel files
 
   const calcelAttach = (index) => {
-    let test = { ...responseData };
-    let temp = test.attachments;
-    debugger;
+    // Create a shallow copy of responseData and its attachments array
+    let updatedResponseData = { ...responseData };
+    let updatedAttachments = [...updatedResponseData.attachments];
 
-    if (temp[index].isNew) {
-      temp.splice(index, 1);
+    if (updatedAttachments[index].isNew) {
+      // If it's a newly added attachment, remove it directly from the list
+      updatedAttachments.splice(index, 1);
     } else {
-      temp[index].isDelete = true;
+      // If it's an existing attachment, mark it for deletion
+      updatedAttachments[index].isDelete = true;
     }
 
-    setResponseData({ ...test });
+    // Update the attachments in the copied state
+    updatedResponseData.attachments = updatedAttachments;
+
+    // Update the state with the modified responseData
+    setResponseData(updatedResponseData);
   };
+
+  // const calcelAttach = (index) => {
+  //   let test = { ...responseData };
+  //   let temp = test.attachments;
+
+  //   if (temp[index].isNew) {
+  //     temp.splice(index, 1);
+  //   } else {
+  //     temp[index].isDelete = true;
+  //   }
+
+  //   setResponseData({ ...test });
+  // };
+
   const UpdateItem = () => {
     setIsopen(false);
     setSelect({
@@ -901,41 +920,65 @@ const DisclosedDetail = (props) => {
     };
     if (responseData.AssignedTo !== null) {
       SPServices.SPUpdateItem({
-        // Listname: "Disclosed Investors Dev",
         Listname: ListName,
         ID: responseData.ID,
         RequestJSON: update,
       })
-        .then((res) => {
+        .then(async (res: any) => {
           debugger;
 
-          let todelete = responseData.attachments.filter((val) => {
+          let todelete = await responseData.attachments.filter((val) => {
             return val.isNew == false && val.isDelete == true;
           });
-          let toadd = responseData.attachments.filter((val) => {
+          let toadd = await responseData.attachments.filter((val) => {
             return val.isNew == true && val.isDelete == false;
           });
 
-          if (todelete.length > 0) {
-            todelete.forEach(async (val, i) => {
-              await sp.web.lists
-                // .getByTitle("Disclosed Investors Dev")
-                .getByTitle(ListName)
-                .items.getById(responseData.ID)
-                .attachmentFiles.getByName(val.fileName)
-                .delete()
-                .then((res) => {
-                  if (todelete.length === i + 1) {
-                    addDataAfterEdit(toadd, responseData.ID);
-                  }
-                })
-                .catch((error) => {
-                  setLoader(false);
-                });
+          if (todelete.length) {
+            let _tempStr: string[] = todelete.map((val: any) => {
+              return val.fileName;
             });
+
+            await sp.web.lists
+              .getByTitle(ListName)
+              .items.getById(responseData.ID)
+              .attachmentFiles.deleteMultiple(..._tempStr)
+              .then(async (res: any) => {
+                await addDataAfterEdit(toadd, responseData.ID);
+              })
+              .catch((error) => {
+                setLoader(false);
+              });
+
+            // for (let i: number = 0; todelete.length > i; i++) {
+            //   sp.web.lists
+            //     .getByTitle(ListName)
+            //     .items.getById(responseData.ID)
+            //     .attachmentFiles.deleteMultiple(..._tempStr)
+            //     .then((res: any) => {
+            //       // if (todelete.length === i + 1) {
+            //       //   addDataAfterEdit(toadd, responseData.ID);
+            //       // }
+            //       addDataAfterEdit(toadd, responseData.ID);
+            //     })
+            //     .catch((error) => {
+            //       setLoader(false);
+            //     });
+
+            //   // res.item.attachmentFiles
+            //   //   .getByName(todelete[i].fileName)
+            //   //   .delete()
+            //   //   .then((files) => {
+            //   //     if (todelete.length === i + 1) {
+            //   //       addDataAfterEdit(toadd, responseData.ID);
+            //   //     }
+            //   //   })
+            //   //   .catch((error) => {
+            //   //     setLoader(false);
+            //   //   });
+            // }
           } else {
-            // _deleteAttach(toadd, responseData.ID);
-            addDataAfterEdit(toadd, responseData.ID);
+            await addDataAfterEdit(toadd, responseData.ID);
           }
         })
         .catch((err) => {
@@ -958,25 +1001,20 @@ const DisclosedDetail = (props) => {
         };
       });
 
-      sp.web.lists
-
-        // .getByTitle("Disclosed Investors Dev")
+      await sp.web.lists
         .getByTitle(ListName)
-
         .items.getById(Id)
-
         .attachmentFiles.addMultiple(newData)
-        .then((arr) => {
+        .then(async (arr) => {
           setError({ ...error });
-
           setIsopen(false);
-          getDatas();
+          await getDatas();
         })
         .catch((err) => {
           setLoader(false);
         });
     } else {
-      getDatas();
+      await getDatas();
       setIsopen(false);
       // alert("Updated");
     }
@@ -1309,11 +1347,11 @@ const DisclosedDetail = (props) => {
 
           {isMobile ? (
             <>
-              <DefaultButton
+              <PrimaryButton
                 //  text="New"
                 // disabled={!isActive}
                 iconProps={{ iconName: "Add" }}
-                styles={buttonstyle}
+                // styles={buttonstyle}
                 className="header_btn"
                 onClick={() => {
                   setIsopen(true);
@@ -1325,7 +1363,7 @@ const DisclosedDetail = (props) => {
               />
               <>
                 {select.singleSelect && select.multiSelect == false && (
-                  <DefaultButton
+                  <PrimaryButton
                     iconProps={{ iconName: "Edit" }}
                     className="header_btn"
                     // text="Edit"
@@ -1344,7 +1382,7 @@ const DisclosedDetail = (props) => {
                 )}
 
                 {(select.singleSelect || select.multiSelect) && (
-                  <IconButton
+                  <PrimaryButton
                     // text="Delete"
                     title="Delete"
                     iconProps={{ iconName: "Delete" }}
@@ -1368,11 +1406,11 @@ const DisclosedDetail = (props) => {
             </>
           ) : (
             <>
-              <DefaultButton
+              <PrimaryButton
                 text="New"
                 // disabled={!isActive}
                 iconProps={{ iconName: "Add" }}
-                styles={buttonstyle}
+                // styles={buttonstyle}
                 onClick={() => {
                   setIsopen(true);
 
@@ -1385,7 +1423,7 @@ const DisclosedDetail = (props) => {
                 {select.singleSelect && select.multiSelect == false && (
                   <>
                     {!isCurrUserItem && !isAdmin && (
-                      <DefaultButton
+                      <PrimaryButton
                         iconProps={{ iconName: "Share" }}
                         text="Transfer request"
                         styles={{
@@ -1402,14 +1440,14 @@ const DisclosedDetail = (props) => {
                       />
                     )}
                     {(isCurrUserItem || isAdmin) && (
-                      <DefaultButton
+                      <PrimaryButton
                         iconProps={{ iconName: "Edit" }}
                         text="Edit"
-                        styles={{
-                          root: {
-                            border: "none",
-                          },
-                        }}
+                        // styles={{
+                        //   root: {
+                        //     border: "none",
+                        //   },
+                        // }}
                         onClick={() => {
                           setIsopen(true);
                           setIsEdit(true);
@@ -1917,7 +1955,7 @@ const DisclosedDetail = (props) => {
           </div>
           {/* field10 */}
 
-          <div style={{ marginTop: "25px", display: "flex" }}>
+          <div style={{ marginTop: "25px", display: "flex", gap: "10px" }}>
             <PrimaryButton
               onClick={() => {
                 isEdit ? UpdateItem() : addItem();
@@ -1932,18 +1970,18 @@ const DisclosedDetail = (props) => {
                   : false
               }
               text={isEdit ? "Update" : "Save"}
-              styles={{
-                root: {
-                  borderRadius: "4px",
-                  backgroundColor: "#02767a",
-                  color: "#fff",
-                  marginRight: "15px",
-                },
-                rootHovered: {
-                  backgroundColor: "#02767a",
-                  color: "#fff",
-                },
-              }}
+              // styles={{
+              //   root: {
+              //     borderRadius: "4px",
+              //     backgroundColor: "#02767a",
+              //     color: "#fff",
+              //     marginRight: "15px",
+              //   },
+              //   rootHovered: {
+              //     backgroundColor: "#02767a",
+              //     color: "#fff",
+              //   },
+              // }}
               //   styles={buttonstyle}
             />
             <DefaultButton

@@ -44,19 +44,22 @@ div#CommentsWrapper {
 
 .pagination .ms-Button {
   border: none !important;
-  background: none !important;
   min-width: 0 !important;
-  padding: 5px !important;
-  color: #000;
+
+  /* color: #000; */
   margin: 12px 0px;
+}
+.pagination .ms-Button .ms-Button--default {
+  background: none !important;
+  padding: 5px !important;
 }
 
 .pagination .ms-Button.ms-Button--primary .ms-Button-label {
-  color: #fff;
+  /* color: #fff; */
   /* background: #202945; */
-  background: #02767a;
+  /* background: #02767a; */
   padding: 10px 14px;
-  border-radius: 50%;
+  border-radius: 50% !important;
 }
 
 /* mobile */
