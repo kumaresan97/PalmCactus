@@ -1,5 +1,5 @@
 const getAlphabets = (value: string) => {
-  let sanitizedValue = value.replace(/[^a-z ]/g, "");
+  let sanitizedValue = value.replace(/[^a-zA-Z ]/g, "");
   return sanitizedValue;
 };
 

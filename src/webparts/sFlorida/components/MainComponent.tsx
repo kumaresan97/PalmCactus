@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { Item, sp } from "@pnp/sp/presets/all";
-import { Checkbox, FontWeights, Label } from "@fluentui/react";
+import { Checkbox, FontWeights, Label, TooltipHost } from "@fluentui/react";
 import { Dropdown } from "@fluentui/react/lib/Dropdown";
 import { Icon } from "@fluentui/react/lib/Icon";
 import { ShimmeredDetailsList } from "@fluentui/react/lib/ShimmeredDetailsList";
@@ -71,6 +71,9 @@ let objSelectedProperty: any;
 const MainComponent = (props) => {
   const [masterData, setmasterdata] = useState<Data[]>([]);
   const [duplicate, setDuplicate] = useState<Data[]>([]);
+  const [statusOption, setStatusOption] = useState([]);
+  const [sourceOption, setSourceOption] = useState([]);
+  const [financeOption, setFinanceOption] = useState([]);
   const [loader, setLoader] = useState(false);
   const [error, setError] = useState({
     Mls: "",
@@ -160,6 +163,7 @@ const MainComponent = (props) => {
     PeopleEmail: "",
     ID: null,
     assignId: null,
+    attachments: [],
   });
   // const [reRender, SetReRender] = useState(true);
   const searchstyle = {
@@ -208,9 +212,11 @@ const MainComponent = (props) => {
       isResizable: true,
       onRender: (Item: any) => {
         return (
-          <div title={`${Item.PropertyAddress}`}>
+          // <div title={`${Item.PropertyAddress}`}>
+          <TooltipHost content={Item.PropertyAddress}>
             <p className="text_ellipsis">{Item.PropertyAddress}</p>
-          </div>
+          </TooltipHost>
+          // </div>
         );
       },
     },
@@ -234,9 +240,11 @@ const MainComponent = (props) => {
           // <div title={`${Item.AssignedTo}`}>
           //   <p className="text_ellipsis">{Item.AssignedTo}</p>
           // </div>
-          <div title={`${Item.AssNameignedTo}`}>
+          // <div title={`${Item.AssNameignedTo}`}>
+          <TooltipHost content={Item.Name}>
             <p className="text_ellipsis">{Item.Name}</p>
-          </div>
+          </TooltipHost>
+          // </div>
         );
       },
     },
@@ -330,9 +338,11 @@ const MainComponent = (props) => {
       isResizable: true,
       onRender: (Item: any) => {
         return (
-          <div title={`${Item.Email}`}>
+          // <div title={`${Item.Email}`}>
+          <TooltipHost content={Item.Email}>
             <p className="text_ellipsis">{Item.Email}</p>
-          </div>
+          </TooltipHost>
+          // </div>
         );
       },
     },
@@ -356,9 +366,11 @@ const MainComponent = (props) => {
       isResizable: true,
       onRender: (Item: any) => {
         return (
-          <div title={`${Item.Notes}`}>
+          // <div title={`${Item.Notes}`}>
+          <TooltipHost content={Item.Notes}>
             <p className="text_ellipsis">{Item.Notes}</p>
-          </div>
+          </TooltipHost>
+          // </div>
         );
       },
     },
@@ -381,17 +393,26 @@ const MainComponent = (props) => {
         return (
           <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
             {item.attachments.map((att, index) => (
-              <li title={att.fileName} key={index}>
-                <a
-                  className="text_ellipsis"
-                  style={{ color: "#605E5C", cursor: "pointer" }}
-                  href={att.serverRelativeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <TooltipHost content={att.fileName}>
+                <li
+                  // title={att.fileName}
+                  key={index}
                 >
-                  {att.fileName}
-                </a>
-              </li>
+                  <a
+                    className="text_ellipsis"
+                    style={{
+                      color: "#605E5C",
+                      cursor: "pointer",
+                      display: "inline-block",
+                    }}
+                    href={att.serverRelativeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {att.fileName}
+                  </a>
+                </li>
+              </TooltipHost>
             ))}
           </ul>
         );
@@ -463,6 +484,8 @@ const MainComponent = (props) => {
 
   //Trestle API fetch
   const handlerApiFetch = () => {
+    console.log(value, "values");
+
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
     var urlencoded = new URLSearchParams();
@@ -491,7 +514,7 @@ const MainComponent = (props) => {
         myHeaders.append("Authorization", `Bearer ${result.access_token}`);
         // To Get All the Items from Trestle
         fetch(
-          `https://api-prod.corelogic.com/trestle/odata/Property?$top=1000&$skip=0`,
+          `https://api-prod.corelogic.com/trestle/odata/Property?$top=1000&$skip=0&$filter=MlsStatus ne 'Closed' and MlsStatus ne 'Pending' and MlsStatus ne 'Active'`,
           {
             method: "GET",
             headers: myHeaders,
@@ -500,14 +523,26 @@ const MainComponent = (props) => {
         )
           .then((response) => response.json())
           .then((result) => {
-            console.log(result.value);
+            debugger;
+            let x = [];
+            result.value.map((val) => {
+              if (val.MlsStatus !== "Closed") {
+                x.push(val.MlsStatus);
+              }
+            });
+            console.log(x, "x");
+            // console.log(
+            //   result.value.filter(
+            //     (val) => val.MlsStatus != null || val.MlsStatus != ""
+            //   )
+            // );
             setSelect(false);
             setMultiSelect(false);
           })
           .catch((error) => console.log("error", error));
         // To get selected
         fetch(
-          `https://api-prod.corelogic.com/trestle/odata/Property?$filter=ListingId eq '${value.Title}'`,
+          `https://api-prod.corelogic.com/trestle/odata/Property?$filter=ListingId eq '${value.Title.trim()}'`,
           {
             method: "GET",
             headers: myHeaders,
@@ -516,31 +551,69 @@ const MainComponent = (props) => {
         )
           .then((response) => response.json())
           .then((result) => {
+            console.log(result, "ressult");
+
             let FormData = { ...value };
             objSelectedProperty = result.value[0];
             if (result.value.length == 0) {
               window.alert("Please enter valid MLS number");
               console.log(objSelectedProperty);
-              FormData.PropertyAddress = "";
-              FormData.Status = "";
-              FormData.Price = "";
-              FormData.AgentName = "";
-              FormData.AgentNumber = "";
-              FormData.PeopleEmail = "";
-              FormData.Sold4 = "";
-              console.log(FormData);
+              // FormData.PropertyAddress = "";
+              // FormData.Status = "";
+              // FormData.Price = "";
+              // FormData.AgentName = "";
+              // FormData.AgentNumber = "";
+              // FormData.PeopleEmail = "";
+              // FormData.Sold4 = "";
+              // console.log(FormData);
               setvalue({ ...FormData });
             } else {
               console.log(objSelectedProperty);
-              FormData.PropertyAddress = objSelectedProperty.UnparsedAddress;
-              FormData.Status = objSelectedProperty.MlsStatus;
-              FormData.Price = objSelectedProperty.ListPrice;
+              // let propertyAddress = objSelectedProperty
+              //   ? objSelectedProperty.UnparsedAddress +
+              //     " " +
+              //     objSelectedProperty.PostalCity +
+              //     "," +
+              //     objSelectedProperty.StateOrProvince +
+              //     " " +
+              //     objSelectedProperty.PostalCode
+              //   : "";
+              let propertyAddress = objSelectedProperty
+                ? `${objSelectedProperty.UnparsedAddress || ""} ${
+                    objSelectedProperty.PostalCity || ""
+                  }, ${objSelectedProperty.StateOrProvince || ""} ${
+                    objSelectedProperty.PostalCode || ""
+                  }`
+                : "";
+
+              // FormData.PropertyAddress = objSelectedProperty.UnparsedAddress;
+              FormData.PropertyAddress = propertyAddress;
+              FormData.Status = objSelectedProperty
+                ? objSelectedProperty.MlsStatus
+                : "";
+              FormData.Price = objSelectedProperty
+                ? objSelectedProperty.ListPrice
+                : "";
               FormData.AgentName = objSelectedProperty.ListAgentFullName;
+              // FormData.AgentName = objSelectedProperty
+              //   ? objSelectedProperty.BuyerAgentFullName
+              //   : "";
               FormData.AgentNumber = objSelectedProperty.ListAgentDirectPhone;
+              // FormData.AgentNumber = objSelectedProperty
+              //   ? objSelectedProperty.BuyerAgentDirectPhone
+              //   : "";
               FormData.Email = objSelectedProperty.ListAgentEmail;
+              // FormData.Email = objSelectedProperty
+              //   ? objSelectedProperty.BuyerAgentEmail
+              //   : "";
               FormData.Sold4 =
                 objSelectedProperty.MlsStatus == "Closed"
                   ? objSelectedProperty.ClosePrice
+                  : "";
+              FormData.OffMarket = false;
+              FormData.FinancingType =
+                objSelectedProperty.MlsStatus == "Closed"
+                  ? objSelectedProperty.BuyerFinancing
                   : "";
               console.log(FormData);
               setvalue({ ...FormData });
@@ -596,7 +669,8 @@ const MainComponent = (props) => {
             Modified: selectedItem[0].Modified,
             PeopleEmail: selectedItem[0].AssignedTo,
             ID: selectedItem[0].ID,
-            assignId: selectedItem[0].AssignedToId,
+            assignId: selectedItem[0].assignId,
+            attachments: selectedItem[0].attachments,
           };
           setEditdata({ ..._selectedItem });
           setSelect(true);
@@ -645,7 +719,8 @@ const MainComponent = (props) => {
         Modified: selectedItem.Modified,
         PeopleEmail: selectedItem.AssignedTo,
         ID: selectedItem.ID,
-        assignId: selectedItem.AssignedToId,
+        assignId: selectedItem.assignId,
+        attachments: selectedItem.attachments,
       };
       // setEditdata({ ..._selectedItem });
       setvalue({ ..._selectedItem });
@@ -673,7 +748,102 @@ const MainComponent = (props) => {
     setrows(paginatedItems);
     setPaginateNumber([firstIndex, lastIndex]);
   }
+  const handlerGetStatus = async () => {
+    await sp.web.lists
+      .getByTitle(listName)
+      .fields.getByTitle("Status")
+      .get()
+      .then((res: any) => {
+        console.log(res.Choices);
+        let arrPPR = res?.Choices?.map((opt) => {
+          return {
+            key: opt,
+            text: opt,
+          };
+        });
+        console.log(arrPPR, "Status");
 
+        arrPPR.sort(function (a, b) {
+          if (a.key < b.key) {
+            return -1;
+          }
+          if (a.key > b.key) {
+            return 1;
+          }
+          return 0;
+        });
+        setStatusOption([...arrPPR]);
+
+        // setOptPurchaseRange([...arrPPR]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const handlerGetFinancingType = async () => {
+    await sp.web.lists
+      .getByTitle(listName)
+      .fields.getByTitle("FinancingType")
+      .get()
+      .then((res: any) => {
+        console.log(res.Choices);
+        let arrPPR = res?.Choices?.map((opt) => {
+          return {
+            key: opt,
+            text: opt,
+          };
+        });
+        arrPPR.sort(function (a, b) {
+          if (a.key < b.key) {
+            return -1;
+          }
+          if (a.key > b.key) {
+            return 1;
+          }
+          return 0;
+        });
+        setFinanceOption([...arrPPR]);
+        console.log(arrPPR, "FinancingType");
+
+        // setOptPurchaseRange([...arrPPR]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const handlerGetWhereat = async () => {
+    await sp.web.lists
+      .getByTitle(listName)
+      .fields.getByInternalNameOrTitle("Whereat")
+      .get()
+      .then((res: any) => {
+        console.log(res.Choices);
+        let arrPPR = res?.Choices?.map((opt) => {
+          return {
+            key: opt,
+            text: opt,
+          };
+        });
+        console.log(arrPPR, "Whereat");
+        arrPPR.sort(function (a, b) {
+          if (a.key < b.key) {
+            return -1;
+          }
+          if (a.key > b.key) {
+            return 1;
+          }
+          return 0;
+        });
+        setSourceOption([...arrPPR]);
+
+        // setOptPurchaseRange([...arrPPR]);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   const getonChange = (key, _value) => {
     let FormData = { ...value };
     let newErrors = { ...error };
@@ -728,23 +898,52 @@ const MainComponent = (props) => {
     setvalue({ ...FormData });
   };
 
-  const getFile = (e: any) => {
-    files = e.target.files;
-    // document.getElementById("att").focus();
+  // const getFile = (e: any) => {
+  //   let files: any[] = [];
+  //   attachFiles = [];
+  //   // document.getElementById("att").focus();
 
-    attachFiles = [...attachment];
+  //   attachFiles = [...value.attachments];
+  //   files = e.target.files;
+
+  //   for (let i = 0; i < files.length; i++) {
+  //     attachFiles.push({
+  //       fileName: files[i].name,
+  //       content: files[i],
+  //       isNew: true,
+  //       isDelete: false,
+  //       serverRelativeUrl: "",
+  //       itemId: value.ID,
+  //     });
+  //   }
+  //   setvalue({ ...value, attachments: attachFiles });
+  //   // setAttachment([...attachFiles]);
+  //   // console.log(attachment, "attach");
+  // };
+  const getFile = (e: any) => {
+    let files: any[] = [];
+    attachFiles = [];
+    attachFiles = [...value.attachments];
+    files = e.target.files;
+
     for (let i = 0; i < files.length; i++) {
-      attachFiles.push({
-        fileName: files[i].name,
-        content: files[i],
-        isNew: true,
-        isDelete: false,
-        serverRelativeUrl: "",
-        itemId: value.ID,
-      });
+      const fileExists = attachFiles.some(
+        (file) => file.fileName === files[i].name
+      );
+
+      if (!fileExists) {
+        attachFiles.push({
+          fileName: files[i].name,
+          content: files[i],
+          isNew: true,
+          isDelete: false,
+          serverRelativeUrl: "",
+          itemId: value.ID,
+        });
+      }
     }
-    setAttachment([...attachFiles]);
-    // console.log(attachment, "attach");
+
+    setvalue({ ...value, attachments: attachFiles });
   };
 
   const updatevalue = () => {
@@ -754,21 +953,21 @@ const MainComponent = (props) => {
     setLoader(true);
     setSelect(false);
     setMultiSelect(false);
-
     sp.web.lists
       .getByTitle(listName)
       .items.getById(Id)
+
       .update({
         Title: value.Title.trim(),
-        AssignedToId: value.assignId,
+        AssignedToId: value.assignId ? value.assignId : null,
         PropertyAddress: value.PropertyAddress,
-        Price: parseFloat(value.Price),
-        ARV: parseFloat(value.ARV),
-        Offer: value.Offer,
+        Price: value ? parseFloat(value.Price) : null,
+        ARV: value ? parseFloat(value.ARV) : null,
+        Offer: value.Offer ? value.Offer : null,
         FinancingType: value.FinancingType,
         AgentName: value.AgentName,
         OffMarket: value.OffMarket,
-        Sold4: value.Sold4,
+        Sold4: value.Sold4 ? value.Sold4 : null,
         Whereat: value.Whereat,
         OfferContract: value.OfferContract,
         AgentNumber: value.AgentNumber,
@@ -777,29 +976,43 @@ const MainComponent = (props) => {
         Status: value.Status,
       })
       .then(async (res) => {
-        let todelete = attachment.filter((val) => {
+        let todelete = await value.attachments.filter((val) => {
           return val.isNew == false && val.isDelete == true;
         });
-        let toadd = attachment.filter((val) => {
+        let toadd = await value.attachments.filter((val) => {
           return val.isNew == true && val.isDelete == false;
         });
 
         if (todelete.length > 0) {
-          todelete.forEach((val, i) => {
-            sp.web.lists
-              .getByTitle(listName)
-              .items.getById(Id)
-              .attachmentFiles.getByName(val.fileName)
-              .delete()
-              .then((res) => {
-                addDataAfterEdit(toadd, Id);
-              })
-              .catch((error) => {
-                setLoader(false);
-              });
+          let _tempStr: string[] = todelete.map((val: any) => {
+            return val.fileName;
           });
+
+          await sp.web.lists
+            .getByTitle(listName)
+            .items.getById(value.ID)
+            .attachmentFiles.deleteMultiple(..._tempStr)
+            .then(async (res: any) => {
+              await addDataAfterEdit(toadd, value.ID);
+            })
+            .catch((error) => {
+              setLoader(false);
+            });
+          // todelete.forEach((val, i) => {
+          //   sp.web.lists
+          //     .getByTitle(listName)
+          //     .items.getById(Id)
+          //     .attachmentFiles.getByName(val.fileName)
+          //     .delete()
+          //     .then((res) => {
+          //       addDataAfterEdit(toadd, Id);
+          //     })
+          //     .catch((error) => {
+          //       setLoader(false);
+          //     });
+          // });
         } else {
-          addDataAfterEdit(toadd, Id);
+          await addDataAfterEdit(toadd, Id);
         }
 
         // setIsPane(false);
@@ -820,21 +1033,21 @@ const MainComponent = (props) => {
         };
       });
 
-      sp.web.lists
+      await sp.web.lists
 
         .getByTitle(listName)
 
         .items.getById(Id)
 
         .attachmentFiles.addMultiple(newData)
-        .then((arr) => {
-          getData();
+        .then(async (arr) => {
+          await getData();
         })
         .catch((err) => {
           setLoader(false);
         });
     } else {
-      getData();
+      await getData();
       // alert("Updated");
     }
     // alert("Updated");
@@ -842,8 +1055,10 @@ const MainComponent = (props) => {
 
   const deleteData = () => {
     setLoader(true);
-    setIsdelete(false);
-    setMultiSelect(false);
+    // setIsdelete(false);
+    // setSelect(false);
+    // setIsEdit(false);
+    // setMultiSelect(false);
     {
       !multiSelect
         ? sp.web.lists
@@ -852,11 +1067,15 @@ const MainComponent = (props) => {
             .delete()
             .then((res) => {
               // SetReRender(true);
+              setIsEdit(false);
+              setIsdelete(false);
+              setSelect(false);
               getData();
               setMultiSlectedId([]);
               // alert("deleted successfully");
             })
             .catch((err) => {
+              setLoader(false);
               // alert(err);
             })
         : multiSlectedId.map((id) => {
@@ -866,11 +1085,16 @@ const MainComponent = (props) => {
               .delete()
               .then((res) => {
                 // SetReRender(true);
-                getData();
+                setIsEdit(false);
+                setIsdelete(false);
+                setSelect(false);
                 setLoader(false);
+                getData();
+
                 // alert("deleted successfully");
               })
               .catch((err) => {
+                setLoader(false);
                 // alert(err);
               });
           });
@@ -927,27 +1151,32 @@ const MainComponent = (props) => {
         // PeopleEmail: value.PeopleEmail,
       })
       .then(async (res) => {
-        let x = attachment.filter((a) => {
-          return a.isDelete != true;
-        });
-        let countNew = 0;
-        for (let i = 0; i < x.length; i++) {
-          await sp.web.lists
-            .getByTitle(listName)
-            .items.getById(res.data.Id)
-            .attachmentFiles.add(x[i].fileName, x[i].content)
-            .then(async (res) => {
-              countNew = countNew + 1;
-              if (countNew >= x.length) {
-                await getData();
-
-                // SetReRender(true);
-              }
-              // setIsPane(false);
+        let x = value.attachments.length
+          ? value.attachments.filter((a) => {
+              return a.isDelete != true;
             })
-            .catch((err) => {
-              console.log(err);
-            });
+          : [];
+        let countNew = 0;
+        if (x.length > 0) {
+          for (let i = 0; i < x.length; i++) {
+            await sp.web.lists
+              .getByTitle(listName)
+              .items.getById(res.data.Id)
+              .attachmentFiles.add(x[i].fileName, x[i].content)
+              .then(async (res) => {
+                countNew = countNew + 1;
+                if (countNew >= x.length) {
+                  await getData();
+
+                  // SetReRender(true);
+                }
+                // setIsPane(false);
+              })
+              .catch((err) => {
+                setLoader(false);
+                console.log(err);
+              });
+          }
         }
 
         // sp.web.lists
@@ -986,6 +1215,7 @@ const MainComponent = (props) => {
         value.PropertyAddress = "";
         value.Whereat = "";
         value.Status = "";
+        value.attachments = [];
         setvalue({ ...value });
         // setIsPane(false);
         getData();
@@ -1054,6 +1284,7 @@ const MainComponent = (props) => {
         isActive = true;
       })
       .catch((err) => {
+        setLoader(false);
         console.log(err);
       });
   };
@@ -1073,13 +1304,16 @@ const MainComponent = (props) => {
     setAttachment([...getattach]);
   };
   const calcelAttach = (index) => {
-    let temp = [...attachment];
+    let test = { ...value };
+    let temp = test.attachments;
+
     if (temp[index].isNew) {
       temp.splice(index, 1);
     } else {
       temp[index].isDelete = true;
     }
-    setAttachment([...temp]);
+    setvalue({ ...test });
+    // setAttachment([...temp]);
   };
 
   const handleSearch = (val) => {
@@ -1115,6 +1349,10 @@ const MainComponent = (props) => {
   };
   useEffect(() => {
     setLoader(true);
+    handlerGetStatus();
+    handlerGetFinancingType();
+    handlerGetWhereat();
+
     getData();
 
     // mobile Responsive Change
@@ -1250,7 +1488,7 @@ const MainComponent = (props) => {
                     Offer: "",
                     FinancingType: "",
                     AgentName: "",
-                    OffMarket: true,
+                    OffMarket: false,
                     Sold4: "",
                     OfferContract: "",
                     AgentNumber: "",
@@ -1260,6 +1498,7 @@ const MainComponent = (props) => {
                     PeopleEmail: "",
                     ID: null,
                     assignId: null,
+                    attachments: [],
                   };
                   setvalue(tempObj);
                   setAttachment([]);
@@ -1345,6 +1584,7 @@ const MainComponent = (props) => {
                     PeopleEmail: "",
                     ID: null,
                     assignId: null,
+                    attachments: [],
                   };
                   setvalue(tempObj);
                   setAttachment([]);
@@ -1624,7 +1864,7 @@ const MainComponent = (props) => {
                 {/* //lastchange */}
                 <IconButton
                   onClick={() => {
-                    value.Title == ""
+                    value.Title.trim() == ""
                       ? alert("Please enter valid MLS No")
                       : handlerApiFetch();
                   }}
@@ -1660,49 +1900,50 @@ const MainComponent = (props) => {
                 placeholder="Select an option"
                 // label="Technologies"
                 defaultSelectedKey={value.Whereat}
-                options={[
-                  {
-                    key: "MLS O Days",
-                    text: "MLS O Days",
-                  },
+                options={sourceOption}
+                // options={[
+                //   {
+                //     key: "MLS O Days",
+                //     text: "MLS O Days",
+                //   },
 
-                  {
-                    key: "Deep Dive",
-                    text: "Deep Dive",
-                  },
-                  {
-                    key: "OffMarket/Wholesale",
-                    text: "OffMarket/Wholesale",
-                  },
-                  {
-                    key: "Pocket Listing",
-                    text: "Pocket Listing",
-                  },
-                  {
-                    key: "FSBO",
-                    text: "FSBO",
-                  },
-                  {
-                    key: "Pack on Market",
-                    text: "Pack on Market",
-                  },
-                  {
-                    key: "Price Drop",
-                    text: "Price Drop",
-                  },
-                  {
-                    key: "Browardbuyers.com",
-                    text: "Browardbuyers.com",
-                  },
-                  {
-                    key: "Email Blast",
-                    text: "Email Blast",
-                  },
-                  {
-                    key: "Plot Point",
-                    text: "Plot Point",
-                  },
-                ]}
+                //   {
+                //     key: "Deep Dive",
+                //     text: "Deep Dive",
+                //   },
+                //   {
+                //     key: "OffMarket/Wholesale",
+                //     text: "OffMarket/Wholesale",
+                //   },
+                //   {
+                //     key: "Pocket Listing",
+                //     text: "Pocket Listing",
+                //   },
+                //   {
+                //     key: "FSBO",
+                //     text: "FSBO",
+                //   },
+                //   {
+                //     key: "Pack on Market",
+                //     text: "Pack on Market",
+                //   },
+                //   {
+                //     key: "Price Drop",
+                //     text: "Price Drop",
+                //   },
+                //   {
+                //     key: "Browardbuyers.com",
+                //     text: "Browardbuyers.com",
+                //   },
+                //   {
+                //     key: "Email Blast",
+                //     text: "Email Blast",
+                //   },
+                //   {
+                //     key: "Plot Point",
+                //     text: "Plot Point",
+                //   },
+                // ]}
                 onChange={(e, val) => {
                   getonChange("Whereat", val.key);
                 }}
@@ -1749,24 +1990,31 @@ const MainComponent = (props) => {
               <Dropdown
                 // label="Technologies"
                 // defaultSelectedKey={value.Status}
-                defaultSelectedKey={value.Status}
+                options={statusOption}
+                selectedKey={
+                  value.Status ? value.Status : ""
+                  // ? statusOption.filter(
+                  //     (e: any) => e.text === value.Status
+                  //   )[0].key
+                  // : ""
+                }
                 onChange={(e, val) => {
                   getonChange("Status", val.key);
                 }}
                 placeholder="Select an option"
-                options={[
-                  { key: "Coming Soon", text: "Coming Soon" },
-                  { key: "Active", text: "Active" },
-                  {
-                    key: "Active/Under Contract",
-                    text: "Active/Under Contract",
-                  },
-                  { key: "Pending", text: "Pending" },
-                  { key: "Closed", text: "Closed" },
-                  { key: "PC Closed", text: "PC Closed" },
-                  { key: "Temp Off Market", text: "Temp Off Market" },
-                  // Add more options as needed
-                ]}
+                // options={[
+                //   { key: "Coming Soon", text: "Coming Soon" },
+                //   { key: "Active", text: "Active" },
+                //   {
+                //     key: "Active/Under Contract",
+                //     text: "Active/Under Contract",
+                //   },
+                //   { key: "Pending", text: "Pending" },
+                //   { key: "Closed", text: "Closed" },
+                //   { key: "PC Closed", text: "PC Closed" },
+                //   { key: "Temp Off Market", text: "Temp Off Market" },
+                //   Add more options as needed
+                // ]}
                 // placeholder="Select an option"
                 // defaultSelectedKey={value.Status}
               />
@@ -1843,7 +2091,9 @@ const MainComponent = (props) => {
               </div>
 
               <TextField
-                styles={textStyle}
+                // styles={textStyle}
+                styles={dollarInputStyle}
+                prefix="$"
                 placeholder="Enter the value here"
                 value={value.OfferContract}
                 errorMessage={error.OfferContract ? error.OfferContract : null}
@@ -1861,7 +2111,9 @@ const MainComponent = (props) => {
               </div>
 
               <TextField
-                styles={textStyle}
+                // styles={textStyle}
+                styles={dollarInputStyle}
+                prefix="$"
                 placeholder="Enter the value here"
                 value={value.Sold4}
                 errorMessage={error.Sold4 ? error.Sold4 : null}
@@ -1985,26 +2237,34 @@ const MainComponent = (props) => {
               <Dropdown
                 placeholder="Select an option"
                 // label="Technologies"
-                defaultSelectedKey={value.FinancingType}
-                options={[
-                  {
-                    key: "Cash",
-                    text: "Cash",
-                  },
+                // defaultSelectedKey={value.FinancingType}
+                options={financeOption}
+                selectedKey={
+                  value.FinancingType ? value.FinancingType : ""
+                  // ? financeOption.filter(
+                  //     (e: any) => e.text === value.FinancingType
+                  //   )[0].key
+                  // : ""
+                }
+                // options={[
+                //   {
+                //     key: "Cash",
+                //     text: "Cash",
+                //   },
 
-                  {
-                    key: "Private Money",
-                    text: "Private Money",
-                  },
-                  {
-                    key: "Hard Money",
-                    text: "Hard Money",
-                  },
-                  {
-                    key: "Conventional",
-                    text: "Conventional",
-                  },
-                ]}
+                //   {
+                //     key: "Private Money",
+                //     text: "Private Money",
+                //   },
+                //   {
+                //     key: "Hard Money",
+                //     text: "Hard Money",
+                //   },
+                //   {
+                //     key: "Conventional",
+                //     text: "Conventional",
+                //   },
+                // ]}
                 onChange={(e, val) => {
                   getonChange("FinancingType", val.key);
                 }}
@@ -2016,8 +2276,8 @@ const MainComponent = (props) => {
                 <Icon iconName="Attach" style={{ marginRight: "10px" }} />
                 <Label styles={labelstyle}>Offer Contract</Label>
               </div>
-              {attachment.length > 0 &&
-                attachment.map((val, index) => {
+              {value.attachments?.length > 0 &&
+                value.attachments.map((val, index) => {
                   if (val.isDelete == false) {
                     return (
                       <div style={{ display: "flex", gap: "10px" }}>

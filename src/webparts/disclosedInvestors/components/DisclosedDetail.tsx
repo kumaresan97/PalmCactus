@@ -38,7 +38,7 @@ import {
 } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import "./Style.css";
 import * as strings from "SFloridaWebPartStrings";
-import { values } from "office-ui-fabric-react";
+import { IconBase, values } from "office-ui-fabric-react";
 import * as alertify from "alertifyjs";
 // import Checkbox1 from "@material-ui/core/Checkbox";
 // import TextField1 from "@material-ui/core/TextField";
@@ -464,17 +464,26 @@ const DisclosedDetail = (props) => {
         return (
           <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
             {item.attachments.map((att, index) => (
-              <li title={att.fileName} key={index}>
-                <a
-                  className="text_ellipsis"
-                  style={{ color: "#605E5C", cursor: "pointer" }}
-                  href={att.serverRelativeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <TooltipHost content={att.fileName}>
+                <li
+                  // title={att.fileName}
+                  key={index}
                 >
-                  {att.fileName}
-                </a>
-              </li>
+                  <a
+                    className="text_ellipsis"
+                    style={{
+                      color: "#605E5C",
+                      cursor: "pointer",
+                      display: "inline-block",
+                    }}
+                    href={att.serverRelativeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {att.fileName}
+                  </a>
+                </li>
+              </TooltipHost>
             ))}
           </ul>
         );
@@ -830,14 +839,28 @@ const DisclosedDetail = (props) => {
     files = e.target.files;
 
     for (let i = 0; i < files.length; i++) {
-      attachFiles.push({
-        fileName: files[i].name,
-        content: files[i],
-        isNew: true,
-        isDelete: false,
-        serverRelativeUrl: "",
-        itemId: responseData.ID,
-      });
+      const fileExists = attachFiles.some(
+        (file) => file.fileName === files[i].name
+      );
+
+      if (!fileExists) {
+        attachFiles.push({
+          fileName: files[i].name,
+          content: files[i],
+          isNew: true,
+          isDelete: false,
+          serverRelativeUrl: "",
+          itemId: responseData.ID,
+        });
+      }
+      // attachFiles.push({
+      //   fileName: files[i].name,
+      //   content: files[i],
+      //   isNew: true,
+      //   isDelete: false,
+      //   serverRelativeUrl: "",
+      //   itemId: responseData.ID,
+      // });
     }
 
     setResponseData({ ...responseData, attachments: attachFiles });
@@ -1361,28 +1384,49 @@ const DisclosedDetail = (props) => {
                   setIsEdit(false);
                 }}
               />
+
               <>
                 {select.singleSelect && select.multiSelect == false && (
-                  <PrimaryButton
-                    iconProps={{ iconName: "Edit" }}
-                    className="header_btn"
-                    // text="Edit"
-                    styles={{
-                      root: {
-                        border: "none",
-                      },
-                    }}
-                    onClick={() => {
-                      setIsopen(true);
-                      setIsEdit(true);
-                      setResponseData({ ...updateData });
-                      //   setCurrentData([...updateData]);
-                    }}
-                  />
+                  <>
+                    {!isCurrUserItem && !isAdmin && (
+                      <IconButton
+                        iconProps={{ iconName: "Share" }}
+                        // text="Transfer request"
+                        styles={{
+                          root: {
+                            border: "none",
+                          },
+                        }}
+                        onClick={() => {
+                          setResponseData({ ...updateData });
+                          SetIsTransferModal(true);
+                          console.log(updateData);
+                          //   setCurrentData([...updateData]);
+                        }}
+                      />
+                    )}
+                    {(isCurrUserItem || isAdmin) && (
+                      <DefaultButton
+                        iconProps={{ iconName: "Edit" }}
+                        // text="Edit"
+                        styles={{
+                          root: {
+                            border: "none",
+                          },
+                        }}
+                        onClick={() => {
+                          setIsopen(true);
+                          setIsEdit(true);
+                          setResponseData({ ...updateData });
+                          //   setCurrentData([...updateData]);
+                        }}
+                      />
+                    )}
+                  </>
                 )}
 
                 {(select.singleSelect || select.multiSelect) && (
-                  <PrimaryButton
+                  <IconButton
                     // text="Delete"
                     title="Delete"
                     iconProps={{ iconName: "Delete" }}
@@ -1403,6 +1447,68 @@ const DisclosedDetail = (props) => {
                   />
                 )}
               </>
+
+              {/* <>
+                {!isCurrUserItem && !isAdmin && (
+                  <IconButton
+                    iconProps={{ iconName: "Share" }}
+                    // text="Transfer request"
+                    styles={{
+                      root: {
+                        border: "none",
+                      },
+                    }}
+                    onClick={() => {
+                      setResponseData({ ...updateData });
+                      SetIsTransferModal(true);
+                      console.log(updateData);
+                      //   setCurrentData([...updateData]);
+                    }}
+                  />
+                )}
+                <>
+                  {select.singleSelect && select.multiSelect == false && (
+                    <DefaultButton
+                      iconProps={{ iconName: "Edit" }}
+                      className="header_btn"
+                      // text="Edit"
+                      styles={{
+                        root: {
+                          border: "none",
+                        },
+                      }}
+                      onClick={() => {
+                        setIsopen(true);
+                        setIsEdit(true);
+                        setResponseData({ ...updateData });
+                        //   setCurrentData([...updateData]);
+                      }}
+                    />
+                  )}
+                </>
+
+                {(select.singleSelect || select.multiSelect) && (
+                  <IconButton
+                    // text="Delete"
+                    title="Delete"
+                    iconProps={{ iconName: "Delete" }}
+                    // styles={buttonstyle}
+                    styles={{
+                      root: {
+                        color: "#FF6347",
+                      },
+                      rootHovered: {
+                        color: "#FF6347",
+                      },
+                    }}
+                    onClick={(e: any) => {
+                      // deleteData();
+                      setSelect({ ...select, isdelete: true });
+                      setIsopen(false);
+                    }}
+                  />
+                )}
+              </> */}
             </>
           ) : (
             <>
@@ -1592,7 +1698,7 @@ const DisclosedDetail = (props) => {
               title="Close"
               onClick={() => {
                 setIsopen(false);
-                // setSelect({ ...select });
+                setSelect({ ...select });
                 setError({
                   InvestorName: "",
 
@@ -1987,6 +2093,7 @@ const DisclosedDetail = (props) => {
             <DefaultButton
               onClick={() => {
                 setIsopen(false);
+                setSelect({ ...select });
                 setError({
                   InvestorName: "",
 
