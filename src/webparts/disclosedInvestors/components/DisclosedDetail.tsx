@@ -176,8 +176,13 @@ const DisclosedDetail = (props) => {
     isdelete: false,
     id: null,
   });
+  // const [err, setErr] = useState("");
   const [error, setError] = useState({
     InvestorName: "",
+    InvestorStragey: "",
+    Areas: "",
+    PurchasePriceRange: "",
+    Notes: "",
 
     Email: "",
     Phone: "",
@@ -595,8 +600,9 @@ const DisclosedDetail = (props) => {
 
   //OnchangeValues
   const onChangeValues = (key, _value) => {
+    debugger;
     let FormData = { ...responseData };
-    let err = { ...error };
+    // let err = { ...error };
 
     //     if(key=="PurchasePriceRange"){
     //         if()
@@ -607,30 +613,30 @@ const DisclosedDetail = (props) => {
 
     FormData[key] = _value;
 
-    if (key === "Phone") {
-      // if (!/^\d*$/.test(_value)) {
-      if (!/^-?\d*\.?\d*$/.test(_value)) {
-        err[key] = "Please enter a Number";
-      } else {
-        err[key] = null;
-      }
-    }
+    // if (key === "Phone") {
+    //   // if (!/^\d*$/.test(_value)) {
+    //   if (!/^-?\d*\.?\d*$/.test(_value)) {
+    //     err[key] = "Please enter a Number";
+    //   } else {
+    //     err[key] = null;
+    //   }
+    // }
 
-    if (key === "Email") {
-      if (_value && !/^[^@]+@[^@]+\.[^.]+$/.test(_value)) {
-        err[key] = "Enter a valid email address";
-      } else {
-        err[key] = "";
-      }
-    }
+    // if (key === "Email") {
+    //   if (_value && !/^[^@]+@[^@]+\.[^.]+$/.test(_value)) {
+    //     err[key] = "Enter a valid email address";
+    //   } else {
+    //     err[key] = "";
+    //   }
+    // }
 
-    if (key == "AssignedTo") {
-      if (_value == null) {
-        err[key] = "Please enter user name or email addres";
-      } else {
-        err[key] = "";
-      }
-    }
+    // if (key == "AssignedTo") {
+    //   if (_value == null) {
+    //     err[key] = "Please enter user name or email addres";
+    //   } else {
+    //     err[key] = "";
+    //   }
+    // }
 
     // if (key === "InvestorName") {
     //   const trimmedValue = _value.trim();
@@ -653,7 +659,18 @@ const DisclosedDetail = (props) => {
     //     }
     //   }
     // }
-    setError({ ...err });
+    setError({
+      ...error,
+      InvestorName: "",
+      InvestorStragey: "",
+      Areas: "",
+      PurchasePriceRange: "",
+      Notes: "",
+
+      Email: "",
+      Phone: "",
+      AssignedTo: "",
+    });
     // setCurrentData([...FormData]);
 
     setAttach(FormData.attachments ? [...FormData.attachments] : []);
@@ -675,19 +692,59 @@ const DisclosedDetail = (props) => {
     }
     // setCurrentData([...x]);
     console.log(x, "x");
+    setError({
+      ...error,
+      InvestorName: "",
+      InvestorStragey: "",
+      Areas: "",
+      PurchasePriceRange: "",
+      Notes: "",
 
+      Email: "",
+      Phone: "",
+      AssignedTo: "",
+    });
     setResponseData({ ...x });
   };
-  const addItem = () => {
-    setIsopen(false);
-    setIsEdit(false);
+  const validation = () => {
+    debugger;
+    let err = { ...error };
+    let errmsg = false;
 
-    setLoader(true);
+    if (responseData.InvestorName.trim() == "") {
+      errmsg = true;
+      err.InvestorName = "Please enter Investor Name";
+    } else if (!responseData.Phone) {
+      errmsg = true;
+
+      err.Phone = "Please enter Phone Number";
+    } else if (responseData.Email.trim() == "") {
+      errmsg = true;
+
+      err.Email = "Please enter Email";
+    } else if (responseData.PurchasePriceRange.length == 0) {
+      errmsg = true;
+
+      err.PurchasePriceRange = "Please enter Purchase Price Range";
+    } else if (responseData.AssignedTo == null) {
+      errmsg = true;
+      error.AssignedTo = "Please enter the user name or  email address";
+    }
+    setError({ ...err });
+
+    return errmsg;
+  };
+
+  const addItem = () => {
     // let _multiChoice = [];
     // _multiChoice = responseData.InvestorStrategy?.map((e: any) => {
     //   return e.name;
     // });
+    setIsopen(false);
+    setIsEdit(false);
 
+    setLoader(true);
+    let validate = validation();
     let val = {
       Title: responseData.InvestorName,
       field_1: responseData.LLC,
@@ -708,17 +765,17 @@ const DisclosedDetail = (props) => {
       AssignedToId: responseData.AssignedTo,
     };
 
-    if (responseData.AssignedTo == null) {
-      error.AssignedTo = "Please enter the user name or  email address";
-      setError({ ...error });
-    } else {
-      // Validation passed, handle submission
-      error.AssignedTo = "";
-      setError({ ...error });
-      // Add logic to submit the selected options
-    }
+    // if (responseData.AssignedTo == null) {
+    //   error.AssignedTo = "Please enter the user name or  email address";
+    //   setError({ ...error });
+    // } else {
+    //   // Validation passed, handle submission
+    //   error.AssignedTo = "";
+    //   setError({ ...error });
+    //   // Add logic to submit the selected options
+    // }
 
-    if (responseData.AssignedTo !== null) {
+    if (!validate) {
       SPServices.SPAddItem({
         // Listname: "Disclosed Investors Dev",
         Listname: ListName,
@@ -762,7 +819,9 @@ const DisclosedDetail = (props) => {
           setLoader(false);
         });
     } else {
+      // setErr(validate);
       setIsopen(true);
+
       // setError({ ...error });
       setLoader(false);
     }
@@ -941,7 +1000,9 @@ const DisclosedDetail = (props) => {
 
       AssignedToId: responseData.AssignedTo,
     };
-    if (responseData.AssignedTo !== null) {
+
+    let validate = validation();
+    if (!validate) {
       SPServices.SPUpdateItem({
         Listname: ListName,
         ID: responseData.ID,
@@ -1701,6 +1762,10 @@ const DisclosedDetail = (props) => {
                 setSelect({ ...select });
                 setError({
                   InvestorName: "",
+                  InvestorStragey: "",
+                  Notes: "",
+                  Areas: "",
+                  PurchasePriceRange: "",
 
                   Email: "",
                   Phone: "",
@@ -1799,6 +1864,9 @@ const DisclosedDetail = (props) => {
             <Dropdown
               placeholder="Select an option"
               selectedKeys={responseData.PurchasePriceRange}
+              errorMessage={
+                error.PurchasePriceRange ? error.PurchasePriceRange : ""
+              }
               multiSelect
               options={optPurchaseRange}
               onChange={(e, item: IDropdownOption | IDropdownOption[]) => {
@@ -2067,10 +2135,7 @@ const DisclosedDetail = (props) => {
                 isEdit ? UpdateItem() : addItem();
               }}
               disabled={
-                !responseData.InvestorName.trim() ||
-                error.InvestorName ||
-                error.Email ||
-                error.Phone
+                !responseData.InvestorName.trim()
                   ? // !responseData.AssignedTo
                     true
                   : false
@@ -2096,6 +2161,10 @@ const DisclosedDetail = (props) => {
                 setSelect({ ...select });
                 setError({
                   InvestorName: "",
+                  InvestorStragey: "",
+                  Notes: "",
+                  Areas: "",
+                  PurchasePriceRange: "",
 
                   Email: "",
                   Phone: "",
