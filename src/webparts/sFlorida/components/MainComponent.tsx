@@ -28,9 +28,9 @@ let DataArray: any[] = [];
 let arrSecondary: any[] = [];
 let isActive = false;
 let Hamburger_img: string = require("../assets/filter-filled-tool-symbol.png");
-// let listName = "S Florida Properties";
+let listName = "S Florida Properties";
 // search
-let listName = "S Florida Dev";
+// let listName = "S Florida Dev";
 interface Data {
   selected?: boolean;
   Title: string;

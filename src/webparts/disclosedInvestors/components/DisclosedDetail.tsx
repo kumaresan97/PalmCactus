@@ -600,7 +600,6 @@ const DisclosedDetail = (props) => {
 
   //OnchangeValues
   const onChangeValues = (key, _value) => {
-    debugger;
     let FormData = { ...responseData };
     // let err = { ...error };
 
@@ -706,30 +705,97 @@ const DisclosedDetail = (props) => {
     });
     setResponseData({ ...x });
   };
+
+  const isValidMobileNumber = (number: string): boolean => {
+    const pattern = /^(?:\+?\d{1,3}[-.\s]?)?\d{10}$/;
+    return pattern.test(number.replace(/[-.\s]/g, ""));
+  };
+
+  const isValidEmail = (email: string): boolean => {
+    // Check if it matches the email pattern
+
+    // Basic email format check
+    const basicRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    // Check for disallowed characters in the local part and domain
+    const disallowedRegex = /["(),:;<>[\]\\]/;
+
+    //changed new one
+
+    // Check for consecutive dots in the local part
+    const consecutiveDotsRegex = /[.]{2}/;
+
+    // Check for consecutive dots in the domain
+    const consecutiveDomainDotsRegex = /(@)[^.]+[.]{2,}(?=[^.]+)/;
+
+    // Check for domain TLD having length greater than 1
+    const domainTldLengthRegex = /(@)[^.]+[.][^.]{1,1}$/;
+
+    // Check for IP address in the domain
+    const ipAddressRegex = /(@)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
+    // Perform all checks
+    const isValid =
+      basicRegex.test(email) &&
+      !disallowedRegex.test(email) &&
+      !consecutiveDotsRegex.test(email) &&
+      !consecutiveDomainDotsRegex.test(email) &&
+      !domainTldLengthRegex.test(email) &&
+      !ipAddressRegex.test(email);
+
+    return isValid;
+  };
+
   const validation = () => {
-    debugger;
     let err = { ...error };
     let errmsg = false;
 
-    if (responseData.InvestorName.trim() == "") {
+    if (!responseData.InvestorName.trim()) {
       errmsg = true;
-      err.InvestorName = "Please enter Investor Name";
-    } else if (!responseData.Phone) {
-      errmsg = true;
-
-      err.Phone = "Please enter Phone Number";
-    } else if (responseData.Email.trim() == "") {
-      errmsg = true;
-
-      err.Email = "Please enter Email";
-    } else if (responseData.PurchasePriceRange.length == 0) {
-      errmsg = true;
-
-      err.PurchasePriceRange = "Please enter Purchase Price Range";
-    } else if (responseData.AssignedTo == null) {
-      errmsg = true;
-      error.AssignedTo = "Please enter the user name or  email address";
+      err.InvestorName = "Investor Name is required.";
     }
+
+    if (!responseData.Phone.trim()) {
+      errmsg = true;
+      err.Phone = "Phone # is required.";
+    } else if (!isValidMobileNumber(responseData.Phone)) {
+      errmsg = true;
+      err.Phone = "Phone number must be 10 digit.";
+    }
+
+    if (!responseData.Email.trim()) {
+      errmsg = true;
+      err.Email = "Email is required.";
+    } else if (!isValidEmail(responseData.Email)) {
+      errmsg = true;
+      err.Email = "Please enter valid email address.";
+    }
+
+    if (!responseData.PurchasePriceRange.length) {
+      errmsg = true;
+      err.PurchasePriceRange = "Purchase Price Range is required.";
+    }
+
+    if (!responseData.InvestorStrategy.length) {
+      errmsg = true;
+      err.InvestorStragey = "Investor Strategy is required.";
+    }
+
+    if (!responseData.Areas.length) {
+      errmsg = true;
+      err.Areas = "Areas is required.";
+    }
+
+    if (!responseData.Notes.trim()) {
+      errmsg = true;
+      err.Notes = "Notes is required.";
+    }
+
+    if (!responseData.AssignedTo) {
+      errmsg = true;
+      err.AssignedTo = "Assigned To is required.";
+    }
+
     setError({ ...err });
 
     return errmsg;
@@ -782,8 +848,6 @@ const DisclosedDetail = (props) => {
         RequestJSON: val,
       })
         .then(async (res) => {
-          debugger;
-
           let x = responseData.attachments.filter((a) => {
             return a.isDelete != true;
           });
@@ -1009,8 +1073,6 @@ const DisclosedDetail = (props) => {
         RequestJSON: update,
       })
         .then(async (res: any) => {
-          debugger;
-
           let todelete = await responseData.attachments.filter((val) => {
             return val.isNew == false && val.isDelete == true;
           });
@@ -1819,7 +1881,9 @@ const DisclosedDetail = (props) => {
             <div style={{ display: "flex", alignItems: "center" }}>
               <Icon iconName="TextField" style={{ marginRight: "10px" }} />
 
-              <Label styles={labelstyle}>Phone #</Label>
+              <Label styles={labelstyle} required>
+                Phone #
+              </Label>
             </div>
 
             <TextField
@@ -1838,7 +1902,9 @@ const DisclosedDetail = (props) => {
             <div style={{ display: "flex", alignItems: "center" }}>
               <Icon iconName="TextField" style={{ marginRight: "10px" }} />
 
-              <Label styles={labelstyle}>Email </Label>
+              <Label styles={labelstyle} required>
+                Email
+              </Label>
             </div>
 
             <TextField
@@ -1858,7 +1924,9 @@ const DisclosedDetail = (props) => {
           <div style={{ margin: "10px 0px 15px 0px" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <Icon iconName="KaizalaLogo" style={{ marginRight: "10px" }} />
-              <Label styles={labelstyle}>Purchase Price Range</Label>
+              <Label styles={labelstyle} required>
+                Purchase Price Range
+              </Label>
             </div>
 
             <Dropdown
@@ -1879,13 +1947,16 @@ const DisclosedDetail = (props) => {
           <div style={{ margin: "10px 0px 15px 0px" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <Icon iconName="KaizalaLogo" style={{ marginRight: "10px" }} />
-              <Label styles={labelstyle}>Investor Strategy</Label>
+              <Label styles={labelstyle} required>
+                Investor Strategy
+              </Label>
             </div>
 
             <Dropdown
               options={optInvStrategy}
               placeholder="Select an option"
               // label="Technologies"
+              errorMessage={error?.InvestorStragey}
               selectedKeys={responseData.InvestorStrategy}
               multiSelect
               //  defaultSelectedKey={responseData.InvestorStrategy}
@@ -1929,7 +2000,9 @@ const DisclosedDetail = (props) => {
           <div style={{ margin: "10px 0px 15px 0px" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <Icon iconName="KaizalaLogo" style={{ marginRight: "10px" }} />
-              <Label styles={labelstyle}>Areas</Label>
+              <Label styles={labelstyle} required>
+                Areas
+              </Label>
             </div>
 
             <Dropdown
@@ -1937,6 +2010,7 @@ const DisclosedDetail = (props) => {
               // defaultSelectedKey={value.Whereat}
               selectedKeys={responseData.Areas}
               options={optAreas}
+              errorMessage={error?.Areas}
               multiSelect
               onChange={(e, item: IDropdownOption | IDropdownOption[]) => {
                 DropdownChange("Areas", item);
@@ -1948,7 +2022,9 @@ const DisclosedDetail = (props) => {
             <div style={{ display: "flex", alignItems: "center" }}>
               <Icon iconName="TextField" style={{ marginRight: "10px" }} />
 
-              <Label styles={labelstyle}>Notes </Label>
+              <Label styles={labelstyle} required>
+                Notes
+              </Label>
             </div>
 
             <TextField
@@ -1956,6 +2032,7 @@ const DisclosedDetail = (props) => {
               placeholder="Enter the value here"
               multiline
               rows={5}
+              errorMessage={error?.Notes}
               value={responseData.Notes}
               //   // id="Email"
               //   // name="Email"
@@ -1970,7 +2047,9 @@ const DisclosedDetail = (props) => {
           <div style={{ margin: "10px 0px 15px 0px" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
               <Icon iconName="Contact" style={{ marginRight: "10px" }} />
-              <Label styles={labelstyle}>Assigned To</Label>
+              <Label styles={labelstyle} required>
+                Assigned To
+              </Label>
             </div>
 
             <PeoplePicker
@@ -2135,9 +2214,15 @@ const DisclosedDetail = (props) => {
                 isEdit ? UpdateItem() : addItem();
               }}
               disabled={
-                !responseData.InvestorName.trim()
-                  ? // !responseData.AssignedTo
-                    true
+                !responseData.InvestorName.trim() ||
+                !responseData.Phone.trim() ||
+                !responseData.Email.trim() ||
+                !responseData.PurchasePriceRange.length ||
+                !responseData.InvestorStrategy.length ||
+                !responseData.Areas.length ||
+                !responseData.Notes.trim() ||
+                !responseData.AssignedTo
+                  ? true
                   : false
               }
               text={isEdit ? "Update" : "Save"}
