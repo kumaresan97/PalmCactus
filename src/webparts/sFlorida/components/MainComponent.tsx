@@ -69,6 +69,12 @@ let objFilter = {
 };
 let objSelectedProperty: any;
 const MainComponent = (props) => {
+  const _currentLoggedInUser: string =
+    props.context._pageContext._user.email?.toLowerCase();
+  // const _currentLoggedInUser: string = "jason@palmcactus.com";
+
+  // console.log("_currentLoggedInUser: ", _currentLoggedInUser);
+
   const [masterData, setmasterdata] = useState<Data[]>([]);
   const [duplicate, setDuplicate] = useState<Data[]>([]);
   const [statusOption, setStatusOption] = useState([]);
@@ -487,8 +493,8 @@ const MainComponent = (props) => {
     console.log(value, "values");
 
     var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
     var urlencoded = new URLSearchParams();
+    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
     urlencoded.append("client_id", "89994d04_f548_4c52_98d0_39cd691a037c");
     urlencoded.append("client_secret", "722b13623c6843899e72e883be10a64d");
     urlencoded.append("scope", "api");
@@ -1064,7 +1070,8 @@ const MainComponent = (props) => {
         ? sp.web.lists
             .getByTitle(listName)
             .items.getById(Id)
-            .delete()
+            .recycle()
+            // .delete()
             .then((res) => {
               // SetReRender(true);
               setIsEdit(false);
@@ -1082,7 +1089,8 @@ const MainComponent = (props) => {
             sp.web.lists
               .getByTitle(listName)
               .items.getById(id)
-              .delete()
+              .recycle()
+              // .delete()
               .then((res) => {
                 // SetReRender(true);
                 setIsEdit(false);
@@ -1347,6 +1355,7 @@ const MainComponent = (props) => {
   const handleResponsiveChange = () => {
     setIsMobile(window.innerWidth <= 768);
   };
+
   useEffect(() => {
     setLoader(true);
     handlerGetStatus();
@@ -1530,25 +1539,29 @@ const MainComponent = (props) => {
                     />
                   )}
 
-                  <IconButton
-                    // text="Delete"
-                    title="Delete"
-                    iconProps={{ iconName: "Delete" }}
-                    // styles={buttonstyle}
-                    styles={{
-                      root: {
-                        color: "#FF6347",
-                      },
-                      rootHovered: {
-                        color: "#FF6347",
-                      },
-                    }}
-                    onClick={(e: any) => {
-                      // deleteData();
-                      setIsdelete(true);
-                      setIsPane(false);
-                    }}
-                  />
+                  {_currentLoggedInUser === "jason@palmcactus.com" ? (
+                    <IconButton
+                      // text="Delete"
+                      title="Delete"
+                      iconProps={{ iconName: "Delete" }}
+                      // styles={buttonstyle}
+                      styles={{
+                        root: {
+                          color: "#FF6347",
+                        },
+                        rootHovered: {
+                          color: "#FF6347",
+                        },
+                      }}
+                      onClick={(e: any) => {
+                        // deleteData();
+                        setIsdelete(true);
+                        setIsPane(false);
+                      }}
+                    />
+                  ) : (
+                    ""
+                  )}
                 </>
               )}
             </>
@@ -1615,7 +1628,9 @@ const MainComponent = (props) => {
                   />
                 )}
 
-                {select || multiSelect ? (
+                {(_currentLoggedInUser === "jason@palmcactus.com" && select) ||
+                (_currentLoggedInUser === "jason@palmcactus.com" &&
+                  multiSelect) ? (
                   <IconButton
                     // text="Delete"
                     title="Delete"
