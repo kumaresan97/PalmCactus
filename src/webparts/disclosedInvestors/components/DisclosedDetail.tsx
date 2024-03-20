@@ -155,6 +155,11 @@ const DisclosedDetail = (props) => {
   // const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
   // const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
+  const _currentLoggedInUser: string =
+    props.context._pageContext._user.email?.toLowerCase();
+  // const _currentLoggedInUser: string = "jason@palmcactus.com";
+  // console.log("props.context._pageContext._user.email", _currentLoggedInUser);
+
   const [state, setState] = useState<IList[]>([]);
   const [masterData, setMasterData] = useState([]);
   const [hamburgerActive, setHamburgerActive] = useState(false);
@@ -939,7 +944,8 @@ const DisclosedDetail = (props) => {
           .getByTitle(ListName)
           .items.getById(responseData.ID)
           .attachmentFiles.getByName(val.fileName)
-          .delete()
+          .recycle()
+          // .delete()
           .then(async (res) => {
             await addDataAfterEdit(data, Id);
           })
@@ -1181,7 +1187,8 @@ const DisclosedDetail = (props) => {
             // .getByTitle("Disclosed Investors Dev")
             .getByTitle(ListName)
             .items.getById(select.id)
-            .delete()
+            .recycle()
+            // .delete()
             .then((res) => {
               // SetReRender(true);
               setLoader(false);
@@ -1199,7 +1206,8 @@ const DisclosedDetail = (props) => {
               // .getByTitle("Disclosed Investors Dev")
               .getByTitle(ListName)
               .items.getById(id)
-              .delete()
+              .recycle()
+              // .delete()
               .then((res) => {
                 if (index == selectionId.length - 1) {
                   // SetReRender(true);
@@ -1548,7 +1556,10 @@ const DisclosedDetail = (props) => {
                   </>
                 )}
 
-                {(select.singleSelect || select.multiSelect) && (
+                {((_currentLoggedInUser === "jason@palmcactus.com" &&
+                  select.singleSelect) ||
+                  (_currentLoggedInUser === "jason@palmcactus.com" &&
+                    select.multiSelect)) && (
                   <IconButton
                     // text="Delete"
                     title="Delete"
@@ -1688,7 +1699,10 @@ const DisclosedDetail = (props) => {
                   </>
                 )}
 
-                {(select.singleSelect || select.multiSelect) && (
+                {((_currentLoggedInUser === "jason@palmcactus.com" &&
+                  select.singleSelect) ||
+                  (_currentLoggedInUser === "jason@palmcactus.com" &&
+                    select.multiSelect)) && (
                   <IconButton
                     // text="Delete"
                     title="Delete"

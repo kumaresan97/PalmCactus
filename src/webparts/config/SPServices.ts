@@ -40,6 +40,12 @@ const SPDeleteItem = async (params: ISPList): Promise<void> => {
     .items.getById(params.ID)
     .delete();
 };
+const SPRecycleItem = async (params: ISPList): Promise<any> => {
+  return await sp.web.lists
+    .getByTitle(params.Listname)
+    .items.getById(params.ID)
+    .recycle();
+};
 const SPReadItems = async (params: IListItems): Promise<[]> => {
   params = formatInputs(params);
   let filterValue: string = formatFilterValue(
@@ -87,6 +93,13 @@ const SPDeleteAttachments = async (params: IAttachDelete) => {
     .items.getById(params.ListID)
     .attachmentFiles.getByName(params.AttachmentName)
     .delete();
+};
+const SPRecycleAttachments = async (params: IAttachDelete) => {
+  return await sp.web.lists
+    .getByTitle(params.ListName)
+    .items.getById(params.ListID)
+    .attachmentFiles.getByName(params.AttachmentName)
+    .recycle();
 };
 
 const SPGetChoices = async (params: ISPListChoiceField) => {
@@ -289,4 +302,6 @@ export default {
   batchInsert,
   batchUpdate,
   batchDelete,
+  SPRecycleAttachments,
+  SPRecycleItem,
 };
